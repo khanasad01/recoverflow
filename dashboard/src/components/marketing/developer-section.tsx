@@ -11,8 +11,8 @@ const CODE_SNIPPETS: Record<string, { lang: string; code: string }> = {
     code: `import { RecoverFlow } from "@recoverflow/sdk";
 
 const client = new RecoverFlow({
-  keyId: process.env.RECOVERFLOW_KEY_ID,
-  keySecret: process.env.RECOVERFLOW_KEY_SECRET,
+  keyId: "your_key_id_here",
+  keySecret: "your_key_secret_here",
   enableAutonomousRecovery: true, // Auto-rescues soft declines
 });
 
@@ -35,7 +35,7 @@ client.webhooks.on("payment.recovered", (event) => {
 import os
 
 client = recoverflow.Client(
-    auth=(os.environ["RF_KEY_ID"], os.environ["RF_KEY_SECRET"])
+    auth=("your_key_id_here", "your_key_secret_here")
 )
 
 # 1. Create an enterprise order with ML routing enabled
@@ -55,7 +55,7 @@ print(f"Order created: {order['id']}, status: {order['status']}")`,
   curl: {
     lang: "bash",
     code: `curl -X POST https://api.recoverflow.com/v1/orders \\
-  -u rzp_live_key_9918:secret_auth_token_8812 \\
+  -u your_key_id_here:your_key_secret_here \\
   -H "Content-Type: application/json" \\
   -d '{
     "amount": 499900,
@@ -77,7 +77,7 @@ import (
 )
 
 func main() {
-    client := recoverflow.NewClient("key_id", "key_secret")
+    client := recoverflow.NewClient("your_key_id_here", "your_key_secret_here")
 
     order, err := client.Orders.Create(&recoverflow.OrderParams{
         Amount:   499900,

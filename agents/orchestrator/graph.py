@@ -121,7 +121,7 @@ def diagnose_node(state: RecoveryState) -> RecoveryState:
         try:
             import google.generativeai as genai
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("gemini-2.0-flash")
+            model = genai.GenerativeModel("gemini-3.6-flash")
             prompt = (
                 f"Analyze this failed payment in 2 sentences. "
                 f"Failure reason: {reason}, Amount: INR {amount}, Recoverability Score: {score:.2f}. "
