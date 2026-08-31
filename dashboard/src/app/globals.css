@@ -1,0 +1,326 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+:root {
+  /* Core */
+  --color-ink-900: #0A2540;
+  --color-ink-800: #0B1B33;
+  --color-brand-600: #1E5EFF;
+  --color-brand-500: #3395FF;
+  --color-accent-violet: #7B61FF;
+  --color-accent-indigo: #635BFF;
+  --color-bg-canvas: #F8F9FC;
+  --color-surface: #FFFFFF;
+  --color-border: #E5E9F0;
+  --color-text-secondary: #5B6B84;
+  --color-text-primary: #0F172A;
+
+  /* Status */
+  --color-success: #00C48C;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-info: #3B82F6;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* Shadow - 3-step elevation system */
+  --shadow-card: 0 20px 40px rgba(10, 37, 64, 0.06);
+  --shadow-card-hover: 0 24px 48px rgba(10, 37, 64, 0.10);
+  --shadow-modal: 0 32px 64px rgba(10, 37, 64, 0.16);
+
+  /* Spacing (8px grid) */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-6: 48px;
+  --space-8: 64px;
+  --space-12: 96px;
+  --space-15: 120px;
+
+  /* Type */
+  --font-ui: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+@theme inline {
+  --color-ink-900: var(--color-ink-900);
+  --color-ink-800: var(--color-ink-800);
+  --color-brand-600: var(--color-brand-600);
+  --color-brand-500: var(--color-brand-500);
+  --color-accent-violet: var(--color-accent-violet);
+  --color-accent-indigo: var(--color-accent-indigo);
+  --color-bg-canvas: var(--color-bg-canvas);
+  --color-surface: var(--color-surface);
+  --color-border: var(--color-border);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-primary: var(--color-text-primary);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+  --color-info: var(--color-info);
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* 3-Step Elevation Classes */
+.elevation-flat {
+  border: 1px solid var(--color-border);
+  box-shadow: none;
+}
+
+.elevation-card {
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.elevation-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-1px);
+}
+
+.elevation-modal {
+  box-shadow: var(--shadow-modal);
+}
+
+/* App Canvas & Typography Base */
+body {
+  background-color: var(--color-bg-canvas);
+  color: var(--color-text-primary);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Common Pill Button */
+.btn-pill-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-brand-600);
+  color: #FFFFFF;
+  font-weight: 600;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px rgba(30, 94, 255, 0.25);
+}
+
+.btn-pill-primary:hover:not(:disabled) {
+  background-color: #1649D8;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(30, 94, 255, 0.35);
+}
+
+.btn-pill-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-pill-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-weight: 500;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-pill-secondary:hover:not(:disabled) {
+  background-color: var(--color-bg-canvas);
+  border-color: #D6DEEB;
+}
+
+/* Form Input with 8px radius and blue focus ring */
+.input-fintech {
+  height: 48px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: 14px;
+  padding: 0 16px;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+}
+
+.input-fintech:focus {
+  outline: none;
+  border-color: var(--color-brand-500);
+  box-shadow: 0 0 0 3px rgba(30, 94, 255, 0.15);
+}
+
+.input-fintech.has-error {
+  border-color: var(--color-danger);
+  border-left-width: 3px;
+}
+
+/* Table Hairline Divider */
+.table-fintech th {
+  border-bottom: 1px solid var(--color-border);
+  background-color: #F8F9FC;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 12px 16px;
+}
+
+.table-fintech td {
+  border-bottom: 1px solid var(--color-border);
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--color-text-primary);
+}
+
+.table-fintech tr:hover td {
+  background-color: #F1F4F9;
+}
+
+/* Compact Table */
+.table-fintech.compact td {
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+.table-fintech.compact th {
+  padding: 8px 12px;
+}
+
+/* Floating Label Group */
+.floating-group {
+  position: relative;
+}
+
+.floating-group label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  background: transparent;
+}
+
+.floating-group input:focus ~ label,
+.floating-group input:not(:placeholder-shown) ~ label {
+  top: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-brand-600);
+  background-color: var(--color-surface);
+  padding: 0 4px;
+}
+
+/* Marquee */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Subtle Pipeline Dash Flow (2.5s loop) */
+@keyframes flowDash {
+  0% {
+    stroke-dashoffset: 24;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-flow-dash {
+  stroke-dasharray: 4 4;
+  animation: flowDash 2.5s linear infinite;
+}
+
+/* Smooth custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-canvas);
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-600);
+}
+
+/* Razorpay-Grade Hero Layout Alignment */
+.hero-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 64px;
+  padding: 116px 48px 96px 48px;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.hero-left {
+  flex: 1 1 52%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.hero-right {
+  flex: 1 1 44%;
+  max-width: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .hero-section {
+    gap: 32px;
+    padding: 104px 24px 72px 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    flex-direction: column;
+    text-align: center;
+    padding: 80px 16px 56px 16px;
+    gap: 40px;
+  }
+  .hero-left {
+    align-items: center;
+    max-width: 100%;
+  }
+  .hero-right {
+    width: 100%;
+    margin-top: 0;
+  }
+}

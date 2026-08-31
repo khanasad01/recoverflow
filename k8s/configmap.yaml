@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: recoverflow-config
+  labels:
+    app: recoverflow
+data:
+  ENVIRONMENT: "production"
+  DATABASE_URL: "postgresql+psycopg2://recoverflow:recoverflow@postgres-service:5432/recoverflow"
+  REDIS_URL: "redis://redis-service:6379/0"
+  SCORING_MODEL: "heuristic"
+  NEXT_PUBLIC_API_URL: "https://api.recoverflow.dev"
