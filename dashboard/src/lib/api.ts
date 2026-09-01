@@ -201,7 +201,7 @@ import {
   MOCK_OVERVIEW,
   MOCK_OPPORTUNITIES,
   MOCK_INTERVENTIONS,
-  MOCK_MOCK_CUSTOMERS,
+  MOCK_CUSTOMERS,
   MOCK_EXPERIMENTS,
   MOCK_LIFT_METRICS,
   MOCK_INCREMENTAL_ATTRIBUTION,
@@ -255,11 +255,11 @@ function getMockDataForUrl(url: string) {
     return MOCK_INTERVENTIONS;
   }
   if (clean === "/api/v1/customers" || clean.endsWith("/customers")) {
-    return MOCK_MOCK_CUSTOMERS;
+    return MOCK_CUSTOMERS;
   }
   if (clean.startsWith("/api/v1/customers/")) {
     const id = clean.split("/").pop();
-    return MOCK_MOCK_CUSTOMERS.find((c) => c.id === id) || MOCK_MOCK_CUSTOMERS[0];
+    return MOCK_CUSTOMERS.find((c) => c.id === id) || MOCK_CUSTOMERS[0];
   }
   if (clean === "/api/v1/experiments" || clean.endsWith("/experiments")) {
     return MOCK_EXPERIMENTS;
