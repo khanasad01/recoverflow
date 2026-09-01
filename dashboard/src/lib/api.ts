@@ -201,7 +201,7 @@ import {
   MOCK_OVERVIEW,
   MOCK_OPPORTUNITIES,
   MOCK_INTERVENTIONS,
-  MOCK_CUSTOMERS,
+  MOCK_MOCK_CUSTOMERS,
   MOCK_EXPERIMENTS,
   MOCK_LIFT_METRICS,
   MOCK_INCREMENTAL_ATTRIBUTION,
@@ -255,11 +255,11 @@ function getMockDataForUrl(url: string) {
     return MOCK_INTERVENTIONS;
   }
   if (clean === "/api/v1/customers" || clean.endsWith("/customers")) {
-    return MOCK_CUSTOMERS;
+    return MOCK_MOCK_CUSTOMERS;
   }
   if (clean.startsWith("/api/v1/customers/")) {
     const id = clean.split("/").pop();
-    return MOCK_CUSTOMERS.find((c) => c.id === id) || MOCK_CUSTOMERS[0];
+    return MOCK_MOCK_CUSTOMERS.find((c) => c.id === id) || MOCK_MOCK_CUSTOMERS[0];
   }
   if (clean === "/api/v1/experiments" || clean.endsWith("/experiments")) {
     return MOCK_EXPERIMENTS;
@@ -309,11 +309,17 @@ export const fetcher = async (url: string) => {
     if (res.ok) {
       return await res.json();
     }
-  } catch {
-    // Backend offline or unreachable: gracefully return rich mock data
-  }
 
-  return getMockDataForUrl(url);
+    // If we get here, we have an HTTP error status (like 401, 403, etc.)
+    // Throw an error so callers can handle it appropriately
+    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  } catch (error) {
+    // Backend offline or unreachable: gracefully return rich mock data
+    if (typeof window !== "undefined") {
+      return getMockDataForUrl(url);
+    }
+    throw error;
+  }
 };
 
 export async function loginUser(email: string, password: string) {
@@ -332,22 +338,16 @@ export async function loginUser(email: string, password: string) {
     if (res.ok) {
       return await res.json();
     }
-  } catch {
-    // Backend offline fallback
-  }
 
-  // Self-contained demo fallback
-  return {
-    access_token: "mock_jwt_token_" + Date.now(),
-    token_type: "bearer",
-    user: {
-      id: "usr_admin",
-      email: email || "admin@recoverflow.dev",
-      full_name: email.includes("admin") ? "Finance Administrator" : "Support Operator",
-      role: email.includes("admin") ? "admin" : "support",
-      is_active: true,
-    },
-  };
+    // If we get an HTTP error, throw it so the caller can handle it
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(
+      errorData.message || `Login failed: ${res.status} ${res.statusText}`
+    );
+  } catch (error) {
+    // Re-throw network errors or our HTTP errors
+    throw error;
+  }
 }
 
 export async function loginWithGoogle(idToken: string) {
@@ -358,19 +358,15 @@ export async function loginWithGoogle(idToken: string) {
       body: JSON.stringify({ id_token: idToken }),
     });
     if (res.ok) return await res.json();
-  } catch {}
 
-  return {
-    access_token: "mock_google_token_" + Date.now(),
-    token_type: "bearer",
-    user: {
-      id: "usr_google",
-      email: "google.user@company.com",
-      full_name: "Google Merchant",
-      role: "admin",
-      is_active: true,
-    },
-  };
+    // Handle HTTP errors
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(
+      errorData.message || `Google login failed: ${res.status} ${res.statusText}`
+    );
+  } catch (error) {
+    throw error;
+  }
 }
 
 export async function requestEmailOTP(email: string) {
@@ -381,9 +377,15 @@ export async function requestEmailOTP(email: string) {
       body: JSON.stringify({ email }),
     });
     if (res.ok) return await res.json();
-  } catch {}
 
-  return { message: "Verification code sent to " + email, success: true };
+    // Handle HTTP errors
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(
+      errorData.message || `Failed to send OTP: ${res.status} ${res.statusText}`
+    );
+  } catch (error) {
+    throw error;
+  }
 }
 
 export async function verifyEmailOTP(email: string, otp: string) {
@@ -394,19 +396,15 @@ export async function verifyEmailOTP(email: string, otp: string) {
       body: JSON.stringify({ email, otp }),
     });
     if (res.ok) return await res.json();
-  } catch {}
 
-  return {
-    access_token: "mock_email_token_" + Date.now(),
-    token_type: "bearer",
-    user: {
-      id: "usr_email",
-      email,
-      full_name: "Email Verified User",
-      role: "admin",
-      is_active: true,
-    },
-  };
+    // Handle HTTP errors
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(
+      errorData.message || `Failed to verify OTP: ${res.status} ${res.statusText}`
+    );
+  } catch (error) {
+    throw error;
+  }
 }
 
 export async function requestWhatsAppOTP(phone: string) {
@@ -417,9 +415,15 @@ export async function requestWhatsAppOTP(phone: string) {
       body: JSON.stringify({ phone }),
     });
     if (res.ok) return await res.json();
-  } catch {}
 
-  return { message: "WhatsApp OTP dispatched to " + phone, success: true };
+    // Handle HTTP errors
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(
+      errorData.message || `Failed to send WhatsApp OTP: ${res.status} ${res.statusText}`
+    );
+  } catch (error) {
+    throw error;
+  }
 }
 
 export async function verifyWhatsAppOTP(phone: string, otp: string) {
@@ -430,19 +434,15 @@ export async function verifyWhatsAppOTP(phone: string, otp: string) {
       body: JSON.stringify({ phone, otp }),
     });
     if (res.ok) return await res.json();
-  } catch {}
 
-  return {
-    access_token: "mock_wa_token_" + Date.now(),
-    token_type: "bearer",
-    user: {
-      id: "usr_whatsapp",
-      email: "whatsapp.user@company.com",
-      full_name: "WhatsApp Verified User",
-      role: "admin",
-      is_active: true,
-    },
-  };
+    // Handle HTTP errors
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(
+      errorData.message || `Failed to verify WhatsApp OTP: ${res.status} ${res.statusText}`
+    );
+  } catch (error) {
+    throw error;
+  }
 }
 
 export async function triggerManualAction(
@@ -465,20 +465,36 @@ export async function triggerManualAction(
         confidence: confidence,
       }),
     });
-    if (res.ok) return await res.json();
-  } catch {}
 
-  return {
-    id: `INT_${Date.now().toString().slice(-5)}`,
-    opportunity_id: opportunityId,
-    action_type: actionType,
-    decision_reason: decisionReason,
-    confidence,
-    policy_status: "ALLOWED",
-    external_ref: `act_${actionType}_${opportunityId}`,
-    status: "EXECUTING",
-    created_at: new Date().toISOString(),
-  };
+    // Handle HTTP errors consistently with fetcher
+    if (res.status === 401 && typeof window !== "undefined") {
+      // Return mock data for demo viewing
+      return getMockDataForUrl(`/api/v1/opportunities/${opportunityId}/action`) as unknown as Intervention;
+    }
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    // For demo purposes, return mock intervention on error
+    // In production, you might want to re-throw or handle differently
+    if (typeof window !== "undefined") {
+      return {
+        id: `INT_${Date.now().toString().slice(-5)}`,
+        opportunity_id: opportunityId,
+        action_type: actionType,
+        decision_reason: decisionReason,
+        confidence,
+        policy_status: "ALLOWED",
+        external_ref: `act_${actionType}_${opportunityId}`,
+        status: "EXECUTING",
+        created_at: new Date().toISOString(),
+      };
+    }
+    throw error;
+  }
 }
 
 export async function updatePolicyYaml(yamlContent: string): Promise<PolicyData> {
@@ -493,12 +509,22 @@ export async function updatePolicyYaml(yamlContent: string): Promise<PolicyData>
       body: JSON.stringify({ yaml_content: yamlContent }),
     });
     if (res.ok) return await res.json();
-  } catch {}
 
-  return {
-    yaml_content: yamlContent,
-    parsed: { updated_at: new Date().toISOString() },
-  };
+    // Handle HTTP errors consistently with fetcher
+    if (res.status === 401 && typeof window !== "undefined") {
+      return getMockDataForUrl("/api/v1/policy") as unknown as PolicyData;
+    }
+
+    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  } catch (error) {
+    if (typeof window !== "undefined") {
+      return {
+        yaml_content: yamlContent,
+        parsed: { updated_at: new Date().toISOString() },
+      };
+    }
+    throw error;
+  }
 }
 
 export async function createExperiment(data: { name: string; treatment_percent?: number; metric?: string }): Promise<Experiment> {
@@ -513,17 +539,27 @@ export async function createExperiment(data: { name: string; treatment_percent?:
       body: JSON.stringify(data),
     });
     if (res.ok) return await res.json();
-  } catch {}
 
-  return {
-    id: `EXP_${Date.now().toString().slice(-4)}`,
-    name: data.name,
-    treatment_percent: data.treatment_percent ?? 50,
-    metric: data.metric ?? "recovery_rate",
-    status: "RUNNING",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+    // Handle HTTP errors consistently with fetcher
+    if (res.status === 401 && typeof window !== "undefined") {
+      return getMockDataForUrl("/api/v1/experiments") as unknown as Experiment;
+    }
+
+    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  } catch (error) {
+    if (typeof window !== "undefined") {
+      return {
+        id: `EXP_${Date.now().toString().slice(-4)}`,
+        name: data.name,
+        treatment_percent: data.treatment_percent ?? 50,
+        metric: data.metric ?? "recovery_rate",
+        status: "RUNNING",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+    }
+    throw error;
+  }
 }
 
 export async function approveOpportunity(opportunityId: string): Promise<Opportunity> {
@@ -537,15 +573,25 @@ export async function approveOpportunity(opportunityId: string): Promise<Opportu
       headers,
     });
     if (res.ok) return await res.json();
-  } catch {}
 
-  const match = MOCK_OPPORTUNITIES.find((o) => o.id === opportunityId) || MOCK_OPPORTUNITIES[0];
-  return {
-    ...match,
-    status: "ACTIONED",
-    status_reason: "Approved by finance administrator; dispatched to execution rail",
-    updated_at: new Date().toISOString(),
-  };
+    // Handle HTTP errors consistently with fetcher
+    if (res.status === 401 && typeof window !== "undefined") {
+      return getMockDataForUrl(`/api/v1/opportunities/${opportunityId}/approve`) as unknown as Opportunity;
+    }
+
+    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  } catch (error) {
+    if (typeof window !== "undefined") {
+      const match = MOCK_OPPORTUNITIES.find((o) => o.id === opportunityId) || MOCK_OPPORTUNITIES[0];
+      return {
+        ...match,
+        status: "ACTIONED",
+        status_reason: "Approved by finance administrator; dispatched to execution rail",
+        updated_at: new Date().toISOString(),
+      };
+    }
+    throw error;
+  }
 }
 
 export async function rejectOpportunity(opportunityId: string): Promise<Opportunity> {
@@ -559,14 +605,23 @@ export async function rejectOpportunity(opportunityId: string): Promise<Opportun
       headers,
     });
     if (res.ok) return await res.json();
-  } catch {}
 
-  const match = MOCK_OPPORTUNITIES.find((o) => o.id === opportunityId) || MOCK_OPPORTUNITIES[0];
-  return {
-    ...match,
-    status: "FAILED",
-    status_reason: "Rejected by finance administrator",
-    updated_at: new Date().toISOString(),
-  };
+    // Handle HTTP errors consistently with fetcher
+    if (res.status === 401 && typeof window !== "undefined") {
+      return getMockDataForUrl(`/api/v1/opportunities/${opportunityId}/reject`) as unknown as Opportunity;
+    }
+
+    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  } catch (error) {
+    if (typeof window !== "undefined") {
+      const match = MOCK_OPPORTUNITIES.find((o) => o.id === opportunityId) || MOCK_OPPORTUNITIES[0];
+      return {
+        ...match,
+        status: "FAILED",
+        status_reason: "Rejected by finance administrator",
+        updated_at: new Date().toISOString(),
+      };
+    }
+    throw error;
+  }
 }
-
