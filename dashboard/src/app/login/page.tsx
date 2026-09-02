@@ -22,6 +22,9 @@ type OnboardingStep = "auth" | "connect" | "workspace" | "guardrails";
 type AutonomyLevel = "suggest" | "approval" | "autonomous";
 
 function subscribeAuth(callback: () => void) {
+  if (typeof window === "undefined") {
+    return () => {};
+  }
   window.addEventListener("storage", callback);
   return () => window.removeEventListener("storage", callback);
 }
@@ -701,130 +704,4 @@ export default function LoginPage() {
                   <div className="p-4 rounded-xl border border-[#E5E9F0] bg-[#F8F9FC] space-y-2">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-[#0A2540]">Auto-retry Threshold</span>
-                      <span className="font-mono font-bold text-[#1E5EFF] text-sm tabular-nums">
-                        ₹{retryThreshold.toLocaleString()}
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min={1000}
-                      max={25000}
-                      step={1000}
-                      value={retryThreshold}
-                      onChange={(e) => setRetryThreshold(Number(e.target.value))}
-                      className="w-full accent-[#1E5EFF] cursor-pointer"
-                    />
-                    <p className="text-[11px] text-[#5B6B84]">
-                      Transactions below ₹{retryThreshold.toLocaleString()} will retry automatically on optimal bank rails without disturbing the user.
-                    </p>
-                  </div>
-
-                  {/* 2. Escalation rule dropdown */}
-                  <div className="p-4 rounded-xl border border-[#E5E9F0] bg-[#F8F9FC] space-y-1.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-[#0A2540]">Human Review Escalation Ceiling</span>
-                      <span className="font-mono font-semibold text-[#008760] text-xs">Hard Gate</span>
-                    </div>
-                    <select
-                      value={escalationCeiling}
-                      onChange={(e) => setEscalationCeiling(Number(e.target.value))}
-                      className="w-full h-11 px-3.5 rounded-lg border border-[#E5E9F0] bg-white text-xs font-semibold text-[#0A2540] outline-none"
-                    >
-                      <option value={25000}>Escalate to human review above ₹25,000</option>
-                      <option value={50000}>Escalate to human review above ₹50,000 (Recommended)</option>
-                      <option value={100000}>Escalate to human review above ₹1,00,000</option>
-                    </select>
-                  </div>
-
-                  {/* 3. Agent autonomy segmented control */}
-                  <div className="p-4 rounded-xl border border-[#E5E9F0] bg-[#F8F9FC] space-y-2">
-                    <span className="text-xs font-bold text-[#0A2540] block">
-                      Agent Autonomy Level
-                    </span>
-                    <div className="grid grid-cols-3 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setAutonomyLevel("suggest")}
-                        className={`py-2 px-3 rounded-lg border text-center cursor-pointer transition-all ${
-                          autonomyLevel === "suggest"
-                            ? "bg-white border-[#1E5EFF] text-[#1E5EFF] font-bold shadow-xs"
-                            : "bg-transparent border-[#E5E9F0] text-[#5B6B84] text-xs"
-                        }`}
-                      >
-                        <span className="text-xs block">Suggest only</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setAutonomyLevel("approval")}
-                        className={`py-2 px-3 rounded-lg border text-center cursor-pointer transition-all ${
-                          autonomyLevel === "approval"
-                            ? "bg-white border-[#1E5EFF] text-[#1E5EFF] font-bold shadow-xs"
-                            : "bg-transparent border-[#E5E9F0] text-[#5B6B84] text-xs"
-                        }`}
-                      >
-                        <span className="text-xs block">Act w/ approval</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setAutonomyLevel("autonomous")}
-                        className={`py-2 px-3 rounded-lg border text-center cursor-pointer transition-all ${
-                          autonomyLevel === "autonomous"
-                            ? "bg-white border-[#1E5EFF] text-[#1E5EFF] font-bold shadow-xs"
-                            : "bg-transparent border-[#E5E9F0] text-[#5B6B84] text-xs"
-                        }`}
-                      >
-                        <span className="text-xs block">Full autonomy</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Live Mini Pipeline Preview (Matching Hero Section mental model) */}
-                  <div className="p-3.5 rounded-xl bg-[#0A2540] text-white space-y-2 text-xs font-mono">
-                    <div className="flex items-center justify-between text-[11px] text-[#00D4FF]">
-                      <span className="flex items-center gap-1.5">
-                        <Zap className="w-3.5 h-3.5" />
-                        <span>Live Guardrail Execution Preview</span>
-                      </span>
-                      <span className="text-[#00C48C]">Policy Active</span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[11px] text-slate-300 pt-1 border-t border-slate-800">
-                      <span>Threshold: &lt; ₹{retryThreshold.toLocaleString()}</span>
-                      <span>Mode: {autonomyLevel === "autonomous" ? "Autonomous" : autonomyLevel === "approval" ? "Approval > ₹50k" : "Suggest"}</span>
-                      <span className="text-[#00C48C]">0 Hallucinations</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Primary Activation CTA */}
-                <div className="pt-2">
-                  <button
-                    onClick={handleActivatePlatform}
-                    disabled={loading}
-                    className="w-full h-12 rounded-full bg-gradient-to-r from-[#1E5EFF] via-[#635BFF] to-[#7B61FF] text-white text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-lg hover:shadow-xl hover:scale-[1.01] transition-all"
-                  >
-                    <span>{loading ? "Activating Engine..." : "Activate RecoverFlow"}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Footer / Trust Guarantee */}
-      <div className="max-w-[520px] mx-auto w-full pt-6 border-t border-[#E5E9F0] flex items-center justify-between text-xs text-[#5B6B84]">
-        <span>RecoverFlow &copy; 2026</span>
-        <button
-          onClick={() => router.push("/")}
-          className="hover:text-[#1E5EFF] transition-colors cursor-pointer"
-        >
-          ← Back to Homepage
-        </button>
-      </div>
-    </div>
-  );
-}
+                      <span className="font-mono font-bold text-[#1E5
