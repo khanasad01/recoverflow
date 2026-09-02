@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useSyncExternalStore } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   ShieldCheck,
@@ -18,8 +18,6 @@ import { loginUser } from "@/lib/api";
 import {
   setToken,
   setUser,
-  isAuthenticated,
-  getUser,
   logout,
   AuthUser,
 } from "@/lib/auth";
@@ -28,105 +26,99 @@ import { toast } from "sonner";
 type OnboardingStep = "auth" | "connect" | "workspace" | "guardrails";
 type AutonomyLevel = "suggest" | "approval" | "autonomous";
 
-function subscribeAuth(callback: () => void) {
-  if (typeof window === "undefined") {
-    return () => {};
-  }
-
-  window.addEventListener("storage", callback);
-
-  return () => {
-    window.removeEventListener("storage", callback);
-  };
-}
-
 export default function LoginPage() {
   const router = useRouter();
 
-  const [step, setStep] = useState<OnboardingStep>("auth");
-  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
-
-  const draftEmail = useSyncExternalStore(
-    subscribeAuth,
-    () => {
-      try {
-        return sessionStorage.getItem("rf_login_draft_email") || "";
-      } catch {
-        return "";
-      }
-    },
-    () => ""
-  );
-
-  const [email, setEmail] = useState<string>(draftEmail);
+  // State for form fields
+  const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [emailError, setEmailError] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [isAuthorizing, setIsAuthorizing] = useState<boolean>(false);
 
-  const [connectedAccount, setConnectedAccount] =
-    useState<string>("rzp_live_94829103");
+  // State for onboarding steps
+  const [step, setStep] = useState<OnboardingStep>("auth");
+  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
 
-  const [businessName, setBusinessName] = useState<string>(
-    "Acme Technologies Pvt Ltd"
-  );
+  // State for auth status (replaces useSyncExternalStore)
+  const [isAuth, setIsAuth] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
 
-  const [teamSize, setTeamSize] = useState<string>("11-50");
-
-  const [useCase, setUseCase] = useState<
-    "churn" | "recovery" | "both"
-  >("both");
-
-  const [teammateEmail, setTeammateEmail] = useState<string>("");
-
-  const [teammates, setTeammates] = useState<string[]>([
-    "cfo@acmetech.io",
-  ]);
-
-  const [retryThreshold, setRetryThreshold] = useState<number>(5000);
-
-  const [escalationCeiling, setEscalationCeiling] =
-    useState<number>(50000);
-
-  const [autonomyLevel, setAutonomyLevel] =
-    useState<AutonomyLevel>("approval");
-
-  const isAuth = useSyncExternalStore(
-    subscribeAuth,
-    () => isAuthenticated(),
-    () => false
-  );
-
-  const currentUser: AuthUser | null = useSyncExternalStore(
-    subscribeAuth,
-    () => getUser(),
-    () => null
-  );
-
-  const updateDraftEmail = (val: string) => {
-    setEmail(val);
-
-    try {
-      sessionStorage.setItem("rf_login_draft_email", val);
-    } catch {}
-  };
-
-  const autofillDemo = (role: "admin" | "support") => {
-    if (role === "admin") {
-      updateDraftEmail("admin@recoverflow.dev");
-      setPassword("admin123");
-      toast.info("Auto-filled Admin credentials");
-    } else {
-      updateDraftEmail("support@recoverflow.dev");
-      setPassword("support123");
-      toast.info("Auto-filled Support credentials");
+  // Initialize email from sessionStorage on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const storedEmail = sessionStorage.getItem("rf_login_draft_email") || "";
+        setEmail(storedEmail);
+      } catch {
+        setEmail("");
+      }
     }
+  }, []);
 
-    setEmailError("");
-    setPasswordError("");
-  };
+  // Save email to sessionStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        sessionStorage.setItem("rf_login_draft_email", email);
+      } catch {
+        // Ignore storage errors
+      }
+    }
+  }, [email]);
 
+  // Initialize auth state from localStorage on mount
+  useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("recoverflow_access_token") : null;
+    setIsAuth(!!token);
+
+    if (typeof window !== "undefined") {
+      const userJson = localStorage.getItem("recoverflow_auth_user");
+      if (userJson) {
+        try {
+          setCurrentUser(JSON.parse(userJson));
+        } catch {
+          setCurrentUser(null);
+        }
+      } else {
+        setCurrentUser(null);
+      }
+    }
+  }, []);
+
+  // Listen for storage events to keep auth state in sync
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "recoverflow_access_token") {
+        setIsAuth(!!e.newValue);
+        if (!e.newValue) {
+          // Token removed, clear user
+          setCurrentUser(null);
+        }
+      }
+      if (e.key === "recoverflow_auth_user") {
+        if (e.newValue) {
+          try {
+            setCurrentUser(JSON.parse(e.newValue));
+          } catch {
+            setCurrentUser(null);
+          }
+        } else {
+          setCurrentUser(null);
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
+  // Handle auth submission
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -155,6 +147,10 @@ export default function LoginPage() {
       setToken(data.access_token);
       setUser(data.user);
 
+      // Update local state
+      setIsAuth(true);
+      setCurrentUser(data.user);
+
       if (authMode === "signup") {
         setStep("connect");
       } else {
@@ -175,12 +171,30 @@ export default function LoginPage() {
     }
   };
 
+  // Handle auto-fill demo credentials
+  const autofillDemo = (role: "admin" | "support") => {
+    if (role === "admin") {
+      setEmail("admin@recoverflow.dev");
+      setPassword("admin123");
+      toast.info("Auto-filled Admin credentials");
+    } else {
+      setEmail("support@recoverflow.dev");
+      setPassword("support123");
+      toast.info("Auto-filled Support credentials");
+    }
+
+    setEmailError("");
+    setPasswordError("");
+  };
+
+  // Handle Razorpay continuation
   const handleContinueWithRazorpay = () => {
-    updateDraftEmail("merchant@company.com");
+    setEmail("merchant@company.com");
     setPassword("secure123");
     setStep("connect");
   };
 
+  // Handle Razorpay authorization
   const handleAuthorizeRazorpay = () => {
     setIsAuthorizing(true);
 
@@ -197,6 +211,34 @@ export default function LoginPage() {
     }, 800);
   };
 
+  // State for workspace step
+  const [connectedAccount, setConnectedAccount] =
+    useState<string>("rzp_live_94829103");
+
+  const [businessName, setBusinessName] = useState<string>(
+    "Acme Technologies Pvt Ltd"
+  );
+
+  const [teamSize, setTeamSize] = useState<string>("11-50");
+
+  const [useCase, setUseCase] = useState<
+    "churn" | "recovery" | "both"
+  >("both");
+
+  const [teammateEmail, setTeammateEmail] = useState<string>("");
+  const [teammates, setTeammates] = useState<string[]>([
+    "cfo@acmetech.io",
+  ]);
+
+  const [retryThreshold, setRetryThreshold] = useState<number>(5000);
+
+  const [escalationCeiling, setEscalationCeiling] =
+    useState<number>(50000);
+
+  const [autonomyLevel, setAutonomyLevel] =
+    useState<AutonomyLevel>("approval");
+
+  // Handle adding teammate
   const handleAddTeammate = (
     e: React.KeyboardEvent<HTMLInputElement>
   ) => {
@@ -217,16 +259,18 @@ export default function LoginPage() {
     }
   };
 
+  // Handle removing teammate
   const removeTeammate = (item: string) => {
     setTeammates(
       teammates.filter((t) => t !== item)
     );
   };
 
+  // Handle activating platform
   const handleActivatePlatform = () => {
     setLoading(true);
 
-    if (!isAuthenticated()) {
+    if (!isAuth) {
       setToken("mock_jwt_token_merchant");
 
       setUser({
@@ -237,12 +281,25 @@ export default function LoginPage() {
         role: "admin",
         is_active: true,
       });
+
+      // Update local state
+      setIsAuth(true);
+      setCurrentUser({
+        id: "usr_onboarded",
+        email: email || "admin@recoverflow.dev",
+        full_name:
+          businessName || "Finance Administrator",
+        role: "admin",
+        is_active: true,
+      });
     }
 
     try {
-      sessionStorage.removeItem(
-        "rf_login_draft_email"
-      );
+      if (typeof window !== "undefined") {
+        sessionStorage.removeItem(
+          "rf_login_draft_email"
+        );
+      }
     } catch {}
 
     toast.success(
@@ -343,6 +400,7 @@ export default function LoginPage() {
             </div>
           </div>
         )}
+
       </div>
 
       {/* Main */}
@@ -375,8 +433,7 @@ export default function LoginPage() {
 
               <button
                 onClick={() =>
-                  router.replace("/overview")
-                }
+                  router.replace("/overview")}
                 className="btn-pill-primary w-full py-3 text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>
@@ -388,8 +445,7 @@ export default function LoginPage() {
 
               <button
                 onClick={() =>
-                  setStep("connect")
-                }
+                  setStep("connect")}
                 className="btn-pill-secondary w-full py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <span>
@@ -480,9 +536,14 @@ export default function LoginPage() {
                       id="auth-email"
                       value={email}
                       onChange={(e) => {
-                        updateDraftEmail(
-                          e.target.value
-                        );
+                        const value = e.target.value;
+                        setEmail(value);
+                        // Update draft email in sessionStorage
+                        if (typeof window !== "undefined") {
+                          try {
+                            sessionStorage.setItem("rf_login_draft_email", value);
+                          } catch {}
+                        }
                         setEmailError("");
                       }}
                       placeholder="alex@company.com"
@@ -530,9 +591,7 @@ export default function LoginPage() {
                       id="auth-password"
                       value={password}
                       onChange={(e) => {
-                        setPassword(
-                          e.target.value
-                        );
+                        setPassword(e.target.value);
                         setPasswordError("");
                       }}
                       placeholder="••••••••"
@@ -553,8 +612,7 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        autofillDemo("admin")
-                      }
+                        autofillDemo("admin")}
                       className="flex-1 py-1.5 px-2 rounded-lg border border-[#E5E9F0] hover:border-[#1E5EFF] bg-[#F8F9FC] text-[11px] font-semibold text-[#0A2540] transition-colors"
                     >
                       Try as Admin
@@ -563,8 +621,7 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        autofillDemo("support")
-                      }
+                        autofillDemo("support")}
                       className="flex-1 py-1.5 px-2 rounded-lg border border-[#E5E9F0] hover:border-[#1E5EFF] bg-[#F8F9FC] text-[11px] font-semibold text-[#0A2540] transition-colors"
                     >
                       Try as Support
@@ -594,8 +651,7 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        setAuthMode("signup")
-                      }
+                        setAuthMode("signup")}
                       className="text-xs text-[#5B6B84] hover:text-[#1E5EFF] transition-colors cursor-pointer"
                     >
                       New to RecoverFlow?{" "}
@@ -607,8 +663,7 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        setAuthMode("signin")
-                      }
+                        setAuthMode("signin")}
                       className="text-xs text-[#5B6B84] hover:text-[#1E5EFF] transition-colors cursor-pointer"
                     >
                       Already have an account?{" "}
@@ -844,8 +899,7 @@ export default function LoginPage() {
                       <button
                         type="button"
                         onClick={() =>
-                          setUseCase("churn")
-                        }
+                          setUseCase("churn")}
                         className={`p-3 rounded-xl border text-center cursor-pointer transition-all ${
                           useCase === "churn"
                             ? "bg-[#1E5EFF]/08 border-[#1E5EFF] text-[#1E5EFF] font-bold"
@@ -860,8 +914,7 @@ export default function LoginPage() {
                       <button
                         type="button"
                         onClick={() =>
-                          setUseCase("recovery")
-                        }
+                          setUseCase("recovery")}
                         className={`p-3 rounded-xl border text-center cursor-pointer transition-all ${
                           useCase === "recovery"
                             ? "bg-[#1E5EFF]/08 border-[#1E5EFF] text-[#1E5EFF] font-bold"
@@ -876,8 +929,7 @@ export default function LoginPage() {
                       <button
                         type="button"
                         onClick={() =>
-                          setUseCase("both")
-                        }
+                          setUseCase("both")}
                         className={`p-3 rounded-xl border text-center cursor-pointer transition-all ${
                           useCase === "both"
                             ? "bg-[#1E5EFF]/08 border-[#1E5EFF] text-[#1E5EFF] font-bold"
@@ -914,7 +966,7 @@ export default function LoginPage() {
                       }
                       onKeyDown={handleAddTeammate}
                       placeholder="colleague@company.com"
-                      className="w-full h-11 px-4 rounded-lg border border-[#E5E9F0] focus:border-[#1E5EFF] focus:ring-2 focus:ring-[#1E5EFF]/20 outline-none text-xs text-[#0F172A]"
+                      className="w-full h-11 px-4 rounded-lg border border-[#E5E9F0] focus:border-[#1E5E9F0] focus:ring-2 focus:ring-[#1E5E9F0]/20 outline-none text-xs text-[#0F172A]"
                     />
 
                     <div className="flex flex-wrap gap-1.5 pt-1">
@@ -949,9 +1001,8 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() =>
-                      setStep("connect")
-                    }
-                    className="text-xs font-semibold text-[#5B6B84] hover:text-[#0F172A] flex items-center gap-1 cursor-pointer"
+                      setStep("connect")}
+                  className="text-xs font-semibold text-[#5B6B84] hover:text-[#0F172A] flex items-center gap-1 cursor-pointer"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
 
@@ -963,9 +1014,8 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        setStep("guardrails")
-                      }
-                      className="text-xs text-[#5B6B84] hover:text-[#1E5EFF] cursor-pointer"
+                        setStep("guardrails")}
+                    className="text-xs text-[#5B6B84] hover:text-[#1E5EFF] cursor-pointer"
                     >
                       Skip for now
                     </button>
@@ -973,9 +1023,8 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        setStep("guardrails")
-                      }
-                      className="btn-pill-primary h-11 px-6 text-xs font-semibold flex items-center gap-1.5"
+                        setStep("guardrails")}
+                    className="btn-pill-primary h-11 px-6 text-xs font-semibold flex items-center gap-1.5"
                     >
                       <span>Continue</span>
 
@@ -1115,8 +1164,7 @@ export default function LoginPage() {
                       <button
                         type="button"
                         onClick={() =>
-                          setAutonomyLevel("suggest")
-                        }
+                          setAutonomyLevel("suggest")}
                         className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                           autonomyLevel === "suggest"
                             ? "border-[#1E5EFF] bg-[#EAF1FF]"
@@ -1135,8 +1183,7 @@ export default function LoginPage() {
                       <button
                         type="button"
                         onClick={() =>
-                          setAutonomyLevel("approval")
-                        }
+                          setAutonomyLevel("approval")}
                         className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                           autonomyLevel === "approval"
                             ? "border-[#1E5EFF] bg-[#EAF1FF]"
@@ -1155,8 +1202,7 @@ export default function LoginPage() {
                       <button
                         type="button"
                         onClick={() =>
-                          setAutonomyLevel("autonomous")
-                        }
+                          setAutonomyLevel("autonomous")}
                         className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                           autonomyLevel === "autonomous"
                             ? "border-[#1E5EFF] bg-[#EAF1FF]"
@@ -1222,9 +1268,8 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() =>
-                      setStep("workspace")
-                    }
-                    className="text-xs font-semibold text-[#5B6B84] hover:text-[#0F172A] flex items-center gap-1 cursor-pointer"
+                      setStep("workspace")}
+                  className="text-xs font-semibold text-[#5B6B84] hover:text-[#0F172A] flex items-center gap-1 cursor-pointer"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
 
