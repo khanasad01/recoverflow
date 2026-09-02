@@ -31,12 +31,9 @@ function subscribeAuth(callback: () => void) {
 
 export default function LoginPage() {
   const router = useRouter();
-
-  // Current onboarding step
   const [step, setStep] = useState<OnboardingStep>("auth");
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
 
-  // Step 1: Auth form states
   const draftEmail = useSyncExternalStore(
     subscribeAuth,
     () => {
@@ -54,19 +51,13 @@ export default function LoginPage() {
   const [emailError, setEmailError] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-
-  // Step 2: Razorpay connect state
   const [isAuthorizing, setIsAuthorizing] = useState<boolean>(false);
   const [connectedAccount, setConnectedAccount] = useState<string>("rzp_live_94829103");
-
-  // Step 3: Workspace details
   const [businessName, setBusinessName] = useState<string>("Acme Technologies Pvt Ltd");
   const [teamSize, setTeamSize] = useState<string>("11-50");
   const [useCase, setUseCase] = useState<"churn" | "recovery" | "both">("both");
   const [teammateEmail, setTeammateEmail] = useState<string>("");
   const [teammates, setTeammates] = useState<string[]>(["cfo@acmetech.io"]);
-
-  // Step 4: Guardrail configuration
   const [retryThreshold, setRetryThreshold] = useState<number>(5000);
   const [escalationCeiling, setEscalationCeiling] = useState<number>(50000);
   const [autonomyLevel, setAutonomyLevel] = useState<AutonomyLevel>("approval");
@@ -90,7 +81,6 @@ export default function LoginPage() {
     } catch {}
   };
 
-  // Demo auto-fill credentials
   const autofillDemo = (role: "admin" | "support") => {
     if (role === "admin") {
       updateDraftEmail("admin@recoverflow.dev");
@@ -105,7 +95,6 @@ export default function LoginPage() {
     setPasswordError("");
   };
 
-  // Step 1 Submission
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setEmailError("");
@@ -143,15 +132,12 @@ export default function LoginPage() {
     }
   };
 
-  // Direct "Continue with Razorpay" SSO
   const handleContinueWithRazorpay = () => {
     updateDraftEmail("merchant@company.com");
     setPassword("secure123");
-    // Advance to Razorpay OAuth connect step
     setStep("connect");
   };
 
-  // Step 2: Authorize Razorpay
   const handleAuthorizeRazorpay = () => {
     setIsAuthorizing(true);
     setTimeout(() => {
@@ -162,7 +148,6 @@ export default function LoginPage() {
     }, 800);
   };
 
-  // Step 3: Add teammate
   const handleAddTeammate = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && teammateEmail.includes("@")) {
       e.preventDefault();
@@ -177,10 +162,8 @@ export default function LoginPage() {
     setTeammates(teammates.filter((t) => t !== item));
   };
 
-  // Step 4: Final Activation
   const handleActivatePlatform = () => {
     setLoading(true);
-    // Ensure auth token and user exist
     if (!isAuthenticated()) {
       setToken("mock_jwt_token_merchant");
       setUser({
@@ -204,10 +187,8 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col justify-between bg-[#FFFFFF] antialiased selection:bg-[#1E5EFF] selection:text-white relative overflow-hidden py-10 px-4 sm:px-6">
-      {/* Background Soft Mesh Glow (Brand-violet 6% opacity) */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[760px] h-[540px] bg-gradient-to-tr from-[#1E5EFF]/08 via-[#635BFF]/06 to-[#7B61FF]/05 blur-3xl rounded-full pointer-events-none -z-10" />
 
-      {/* Top Bar / Navigation Header */}
       <div className="max-w-[520px] mx-auto w-full flex items-center justify-between pb-6">
         <button
           onClick={() => router.push("/")}
@@ -227,7 +208,6 @@ export default function LoginPage() {
           </span>
         </button>
 
-        {/* Multi-step progress indicator when in onboarding steps */}
         {step !== "auth" && !isAuth && (
           <div className="flex items-center gap-1.5 text-xs font-mono font-semibold text-[#5B6B84]">
             <span className="hidden sm:inline">
@@ -245,9 +225,7 @@ export default function LoginPage() {
         )}
       </div>
 
-      {/* CENTERED FLOW CONTAINER */}
       <div className="flex-1 flex items-center justify-center">
-        {/* CASE A: Active Session Detected (Eliminates Back Button Trap) */}
         {isAuth && step === "auth" ? (
           <div className="w-full max-w-[440px] bg-white border border-[#E5E9F0] rounded-2xl shadow-[0_20px_40px_rgba(10,37,64,0.06)] p-6 sm:p-8 space-y-5 text-center">
             <div className="w-12 h-12 rounded-full bg-[#E8F0FF] text-[#1E5EFF] flex items-center justify-center mx-auto">
@@ -292,10 +270,8 @@ export default function LoginPage() {
           </div>
         ) : (
           <>
-            {/* SCREEN 1: Sign In / Sign Up (440px width) */}
             {step === "auth" && (
               <div className="w-full max-w-[440px] bg-white border border-[#E5E9F0] rounded-2xl shadow-[0_20px_40px_rgba(10,37,64,0.06)] p-6 sm:p-8 space-y-6 text-left animate-in fade-in duration-200">
-                {/* Header */}
                 <div className="space-y-1 text-center">
                   <h2 className="text-2xl sm:text-[28px] font-bold text-[#1A1A2E] tracking-tight leading-tight">
                     {authMode === "signin" ? "Welcome back" : "Set up your recovery workspace"}
@@ -307,20 +283,17 @@ export default function LoginPage() {
                   </p>
                 </div>
 
-                {/* Primary Auth Option: Continue with Razorpay */}
                 <button
                   type="button"
                   onClick={handleContinueWithRazorpay}
                   className="w-full h-12 rounded-full border-2 border-[#1E5EFF] bg-[#1E5EFF]/5 hover:bg-[#1E5EFF]/10 text-[#0A2540] text-sm font-semibold flex items-center justify-center gap-2.5 transition-all shadow-xs cursor-pointer"
                 >
-                  {/* Razorpay Brand Mark */}
                   <div className="w-5 h-5 rounded-md bg-[#0C2340] text-white flex items-center justify-center font-bold text-[11px]">
                     R
                   </div>
                   <span>Continue with Razorpay</span>
                 </button>
 
-                {/* Divider */}
                 <div className="relative flex items-center justify-center">
                   <div className="border-t border-[#E5E9F0] w-full" />
                   <span className="bg-white px-3 text-xs font-medium text-[#5B6B84]">
@@ -328,9 +301,7 @@ export default function LoginPage() {
                   </span>
                 </div>
 
-                {/* Email / Password Form */}
                 <form onSubmit={handleAuthSubmit} className="space-y-4">
-                  {/* Work Email */}
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-[#0A2540]" htmlFor="auth-email">
                       Work Email
@@ -351,7 +322,6 @@ export default function LoginPage() {
                     )}
                   </div>
 
-                  {/* Password */}
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-semibold text-[#0A2540]" htmlFor="auth-password">
@@ -383,7 +353,6 @@ export default function LoginPage() {
                     )}
                   </div>
 
-                  {/* Quick Demo Shortcuts */}
                   <div className="flex items-center gap-2 pt-1">
                     <button
                       type="button"
@@ -401,7 +370,6 @@ export default function LoginPage() {
                     </button>
                   </div>
 
-                  {/* Primary CTA */}
                   <button
                     type="submit"
                     disabled={loading}
@@ -412,7 +380,6 @@ export default function LoginPage() {
                   </button>
                 </form>
 
-                {/* Footer Switch Link */}
                 <div className="text-center pt-1 border-t border-[#E5E9F0]">
                   {authMode === "signin" ? (
                     <button
@@ -433,7 +400,6 @@ export default function LoginPage() {
                   )}
                 </div>
 
-                {/* Trust Row */}
                 <div className="flex items-center justify-center gap-2 text-[11px] text-[#5B6B84] pt-1">
                   <Lock className="w-3 h-3 text-[#00C48C]" />
                   <span>Bank-grade encryption · SOC 2 Type II Certified</span>
@@ -441,12 +407,9 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* SCREEN 2: Razorpay Account Connect (520px width) */}
             {step === "connect" && (
               <div className="w-full max-w-[520px] bg-white border border-[#E5E9F0] rounded-2xl shadow-[0_20px_40px_rgba(10,37,64,0.06)] p-6 sm:p-8 space-y-6 text-left animate-in fade-in duration-200">
-                {/* Connect Visual Banner: Razorpay <-> RecoverFlow with Animated Lock */}
                 <div className="p-4 rounded-xl bg-[#F8F9FC] border border-[#E5E9F0] flex items-center justify-between">
-                  {/* Left: Razorpay */}
                   <div className="flex items-center gap-2.5">
                     <div className="w-10 h-10 rounded-xl bg-[#0C2340] text-white flex items-center justify-center font-bold text-sm shadow-xs">
                       R
@@ -457,7 +420,6 @@ export default function LoginPage() {
                     </div>
                   </div>
 
-                  {/* Center: Connecting Line + Lock */}
                   <div className="flex-1 flex items-center justify-center px-3 relative">
                     <div className="w-full border-t-2 border-dashed border-[#1E5EFF]/40" />
                     <div className="absolute w-6 h-6 rounded-full bg-white border border-[#E5E9F0] shadow-xs flex items-center justify-center text-[#1E5EFF]">
@@ -465,7 +427,6 @@ export default function LoginPage() {
                     </div>
                   </div>
 
-                  {/* Right: RecoverFlow */}
                   <div className="flex items-center gap-2.5">
                     <div className="w-10 h-10 rounded-xl bg-[#0A2540] text-white flex items-center justify-center font-bold text-sm shadow-xs border border-[#1D3152]">
                       RF
@@ -477,7 +438,6 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                {/* Headline & Critical Trust Subhead */}
                 <div className="space-y-1.5">
                   <h2 className="text-2xl font-bold text-[#1A1A2E] tracking-tight">
                     Connect your Razorpay account
@@ -487,7 +447,6 @@ export default function LoginPage() {
                   </p>
                 </div>
 
-                {/* Plain-Language Permission Invariants */}
                 <div className="space-y-2 p-3.5 rounded-xl bg-[#F8F9FC] border border-[#E5E9F0] text-xs">
                   <div className="flex items-center gap-2 text-[#008760] font-medium">
                     <Check className="w-4 h-4 text-[#00C48C] flex-shrink-0 stroke-[2]" />
@@ -503,7 +462,6 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                {/* Action CTAs */}
                 <div className="space-y-2 pt-1">
                   <button
                     onClick={handleAuthorizeRazorpay}
@@ -529,7 +487,6 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* SCREEN 3: Workspace Setup (520px width) */}
             {step === "workspace" && (
               <div className="w-full max-w-[520px] bg-white border border-[#E5E9F0] rounded-2xl shadow-[0_20px_40px_rgba(10,37,64,0.06)] p-6 sm:p-8 space-y-6 text-left animate-in fade-in duration-200">
                 <div className="space-y-1">
@@ -542,7 +499,6 @@ export default function LoginPage() {
                 </div>
 
                 <div className="space-y-4">
-                  {/* Business Name */}
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-[#0A2540]">
                       Registered Business Name
@@ -555,7 +511,6 @@ export default function LoginPage() {
                     />
                   </div>
 
-                  {/* Team Size Dropdown */}
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-[#0A2540]">
                       Company Size
@@ -572,7 +527,6 @@ export default function LoginPage() {
                     </select>
                   </div>
 
-                  {/* Primary Use Case (Radio Cards) */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-[#0A2540]">
                       Primary Recovery Goal
@@ -616,7 +570,6 @@ export default function LoginPage() {
                     </div>
                   </div>
 
-                  {/* Invite Teammates */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-[#0A2540] flex items-center justify-between">
                       <span>Invite Finance Teammates (Optional)</span>
@@ -650,7 +603,6 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                {/* Bottom Navigation */}
                 <div className="flex items-center justify-between pt-2 border-t border-[#E5E9F0]">
                   <button
                     type="button"
@@ -682,7 +634,6 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* SCREEN 4: Guardrails Setup ("Aha Moment", 640px wider card) */}
             {step === "guardrails" && (
               <div className="w-full max-w-[640px] bg-white border border-[#E5E9F0] rounded-2xl shadow-[0_20px_40px_rgba(10,37,64,0.06)] p-6 sm:p-8 space-y-6 text-left animate-in fade-in duration-200">
                 <div className="space-y-1">
@@ -698,10 +649,42 @@ export default function LoginPage() {
                   </p>
                 </div>
 
-                {/* Guardrail Controls */}
                 <div className="space-y-4">
-                  {/* 1. Auto-retry threshold slider */}
                   <div className="p-4 rounded-xl border border-[#E5E9F0] bg-[#F8F9FC] space-y-2">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-[#0A2540]">Auto-retry Threshold</span>
-                      <span className="font-mono font-bold text-[#1E5
+                      <span className="font-mono font-bold text-[#1E5EFF] text-sm tabular-nums">
+                        ₹{retryThreshold.toLocaleString()}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={1000}
+                      max={25000}
+                      step={1000}
+                      value={retryThreshold}
+                      onChange={(e) => setRetryThreshold(Number(e.target.value))}
+                      className="w-full accent-[#1E5EFF] cursor-pointer"
+                    />
+                    <p className="text-[11px] text-[#5B6B84]">
+                      Transactions below ₹{retryThreshold.toLocaleString()} will retry automatically on optimal bank rails without disturbing the user.
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-xl border border-[#E5E9F0] bg-[#F8F9FC] space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-[#0A2540]">Human Review Escalation Ceiling</span>
+                      <span className="font-mono font-semibold text-[#008760] text-xs">Hard Gate</span>
+                    </div>
+                    <select
+                      value={escalationCeiling}
+                      onChange={(e) => setEscalationCeiling(Number(e.target.value))}
+                      className="w-full h-11 px-3.5 rounded-lg border border-[#E5E9F0] bg-white text-xs font-semibold text-[#0A2540] outline-none"
+                    >
+                      <option value={25000}>Escalate to human review above ₹25,000</option>
+                      <option value={50000}>Escalate to human review above ₹50,000 (Recommended)</option>
+                      <option value={100000}>Escalate to human review above ₹1,00,000</option>
+                    </select>
+                  </div>
+
+                  <div className="p-4 rounded-xl border border-[#E5E9F0] bg-[#F8F9FC] space-y-2
