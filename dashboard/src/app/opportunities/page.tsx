@@ -13,6 +13,7 @@ import {
   Ban,
   Mail,
   Zap,
+  MessageSquare,
 } from "lucide-react";
 import {
   fetcher,
@@ -38,7 +39,6 @@ function OpportunitiesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Filters read from URL
   const initialStatus = searchParams.get("status") || "";
   const initialSource = searchParams.get("source") || "";
   const initialSearch = searchParams.get("q") || "";
@@ -66,7 +66,6 @@ function OpportunitiesContent() {
     localStorage.setItem("rf_table_density", newDensity);
   };
 
-  // Synchronize URL query params
   const updateUrlParams = (newStatus: string, newSource: string, newSearch: string, newScore: number) => {
     const params = new URLSearchParams();
     if (newStatus) params.set("status", newStatus);
@@ -94,7 +93,6 @@ function OpportunitiesContent() {
     { refreshInterval: 5000 }
   );
 
-  // Filter pipeline
   const filteredOpportunities = (opportunities || []).filter((opp) => {
     if (statusFilter && opp.status !== statusFilter) return false;
     if (sourceFilter && opp.source_type?.toLowerCase() !== sourceFilter.toLowerCase()) return false;
@@ -110,7 +108,6 @@ function OpportunitiesContent() {
     return true;
   });
 
-  // Action Triggers
   const handleManualAction = async (actionType: string) => {
     if (!selectedOpp) return;
     setActionLoading(true);
@@ -156,7 +153,6 @@ function OpportunitiesContent() {
     }
   };
 
-  // Convert opportunity interventions into synthetic evidence events for timeline
   const opportunityEvidence: EvidenceEvent[] = (selectedOpp?.interventions || []).map((intv) => ({
     id: intv.id,
     opportunity_id: intv.opportunity_id,
@@ -170,7 +166,6 @@ function OpportunitiesContent() {
   return (
     <AppLayout>
       <div className="space-y-5">
-        {/* Header Title */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight">
@@ -181,7 +176,6 @@ function OpportunitiesContent() {
             </p>
           </div>
 
-          {/* Density Switcher */}
           <div className="flex items-center gap-1 p-1 bg-white border border-[#E5E9F0] rounded-lg shadow-xs self-start sm:self-auto text-xs">
             <button
               onClick={() => toggleDensity("comfortable")}
@@ -202,10 +196,8 @@ function OpportunitiesContent() {
           </div>
         </div>
 
-        {/* Filter Bar */}
         <div className="bg-white border border-[#E5E9F0] rounded-xl p-4 shadow-sm space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-center">
-            {/* Search Input (4 cols) */}
             <div className="lg:col-span-4 relative">
               <Search className="w-4 h-4 text-[#5B6B84] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
@@ -217,7 +209,6 @@ function OpportunitiesContent() {
               />
             </div>
 
-            {/* Status Select (3 cols) */}
             <div className="lg:col-span-3">
               <select
                 value={statusFilter}
@@ -233,7 +224,6 @@ function OpportunitiesContent() {
               </select>
             </div>
 
-            {/* Gateway Source (2 cols) */}
             <div className="lg:col-span-2">
               <select
                 value={sourceFilter}
@@ -246,7 +236,6 @@ function OpportunitiesContent() {
               </select>
             </div>
 
-            {/* Score Slider (3 cols) */}
             <div className="lg:col-span-3 flex items-center gap-3">
               <div className="flex-1">
                 <div className="flex items-center justify-between text-[11px] text-[#5B6B84] mb-1">
@@ -283,7 +272,6 @@ function OpportunitiesContent() {
           </div>
         </div>
 
-        {/* Opportunities Table Container */}
         <div className="bg-white border border-[#E5E9F0] rounded-xl shadow-sm overflow-hidden">
           {error ? (
             <ErrorTableState
@@ -327,7 +315,6 @@ function OpportunitiesContent() {
                         onClick={() => setSelectedOpp(opp)}
                         className={`cursor-pointer transition-colors ${isSelected ? "bg-[#F1F4F9]" : ""}`}
                       >
-                        {/* ID */}
                         <td className="font-mono font-semibold text-[#1E5EFF]">
                           <div>{opp.id}</div>
                           {opp.related_opportunity_id && (
@@ -336,40 +323,26 @@ function OpportunitiesContent() {
                             </div>
                           )}
                         </td>
-
-                        {/* Source */}
                         <td>
                           <span className="capitalize font-medium text-[#0F172A]">
                             {opp.source_type || "razorpay"}
                           </span>
                         </td>
-
-                        {/* Customer */}
                         <td className="max-w-xs truncate text-[#0F172A]">
                           {opp.customer_id || "cust_guest_checkout"}
                         </td>
-
-                        {/* Amount at Risk */}
                         <td className="text-right font-mono font-semibold text-[#0F172A]">
                           ₹{Number(opp.amount_at_risk || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                         </td>
-
-                        {/* Failure Reason */}
                         <td className="text-[#5B6B84] max-w-xs truncate font-mono text-[11px]">
                           {opp.failure_reason || "card_declined"}
                         </td>
-
-                        {/* Score */}
                         <td className="w-32">
                           <ScoreBar score={scoreVal} />
                         </td>
-
-                        {/* Status */}
                         <td>
                           <StatusBadge status={opp.status} size="sm" />
                         </td>
-
-                        {/* A/B Group */}
                         <td>
                           <span
                             className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold ${
@@ -381,8 +354,6 @@ function OpportunitiesContent() {
                             {opp.group || "treatment"}
                           </span>
                         </td>
-
-                        {/* Created At */}
                         <td className="text-[#5B6B84] font-mono text-[11px] whitespace-nowrap">
                           {new Date(opp.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                         </td>
@@ -395,35 +366,28 @@ function OpportunitiesContent() {
           )}
         </div>
 
-        {/* RIGHT DETAIL DRAWER (480px, --shadow-modal) */}
         {selectedOpp && (
           <div className="fixed inset-0 z-50 flex justify-end">
-            {/* Scrim */}
             <div
               className="fixed inset-0 bg-[#0A2540]/40 backdrop-blur-xs transition-opacity"
               onClick={() => setSelectedOpp(null)}
             />
 
-            {/* Slide-over Panel */}
             <div className="relative w-full max-w-[480px] bg-white h-full shadow-[0_32px_64px_rgba(10,37,64,0.16)] flex flex-col z-10 animate-in slide-in-from-right duration-200">
-              {/* Drawer Topbar */}
               <div className="px-6 py-4 border-b border-[#E5E9F0] flex items-center justify-between bg-[#F8F9FC]">
                 <div className="flex items-center gap-3">
                   <span className="font-mono font-bold text-sm text-[#0F172A]">{selectedOpp.id}</span>
                   <StatusBadge status={selectedOpp.status} size="sm" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setSelectedOpp(null)}
-                    aria-label="Close drawer"
-                    className="p-1.5 rounded-lg text-[#5B6B84] hover:text-[#0F172A] hover:bg-[#E5E9F0] transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
+                <button
+                  onClick={() => setSelectedOpp(null)}
+                  aria-label="Close drawer"
+                  className="p-1.5 rounded-lg text-[#5B6B84] hover:text-[#0F172A] hover:bg-[#E5E9F0] transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
 
-              {/* HUMAN REVIEW BANNER (Top of drawer, impossible to miss) */}
               {selectedOpp.status === "HUMAN_REVIEW" && (
                 <div className="p-4 bg-[#7B61FF]/10 border-b border-[#7B61FF]/30 space-y-3">
                   <div className="flex items-center gap-2 text-xs font-bold text-[#5B41E6]">
@@ -451,9 +415,7 @@ function OpportunitiesContent() {
                 </div>
               )}
 
-              {/* Drawer Scrollable Content */}
               <div className="p-6 space-y-6 flex-1 overflow-y-auto">
-                {/* Financial Metadata Card */}
                 <div className="p-4 rounded-xl bg-[#F8F9FC] border border-[#E5E9F0] flex items-center justify-between">
                   <div>
                     <span className="text-[11px] font-semibold text-[#5B6B84] uppercase tracking-wider block">
@@ -476,10 +438,8 @@ function OpportunitiesContent() {
                   </div>
                 </div>
 
-                {/* Structured Why Card (Label/Value Grid) */}
                 <WhyCard opportunity={selectedOpp} evidenceList={opportunityEvidence} />
 
-                {/* Contextual Action Buttons (only valid actions render) */}
                 {selectedOpp.status !== "HUMAN_REVIEW" && (
                   <div className="space-y-2">
                     <div className="text-xs font-semibold uppercase tracking-wider text-[#5B6B84]">
@@ -521,11 +481,19 @@ function OpportunitiesContent() {
                         <Mail className="w-3.5 h-3.5 text-[#5B6B84]" />
                         <span>Email Sequence</span>
                       </button>
+
+                      <button
+                        onClick={() => handleManualAction("whatsapp")}
+                        disabled={actionLoading}
+                        className="p-2.5 rounded-lg border border-[#E5E9F0] hover:border-[#1E5EFF] hover:bg-[#F8F9FC] text-xs font-semibold text-[#0F172A] flex items-center gap-2 cursor-pointer transition-colors"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5 text-[#00C48C]" />
+                        <span>Send WhatsApp</span>
+                      </button>
                     </div>
                   </div>
                 )}
 
-                {/* Evidence Timeline (Vertical Dot-and-Line) */}
                 <div className="space-y-3">
                   <div className="text-xs font-semibold uppercase tracking-wider text-[#5B6B84]">
                     Evidence &amp; Decision Timeline
