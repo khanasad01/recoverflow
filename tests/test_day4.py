@@ -51,7 +51,7 @@ def test_razorpay_payment_link_adapter(test_db):
     test_db.flush()
 
     adapter = RazorpayPaymentLinkAdapter()
-    with patch("integrations.razorpay_client.requests.post") as mock_post:
+    with patch("services.action_executor.razorpay_adapter.requests.post") as mock_post:
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = {
             "id": "plink_test_12345",
@@ -63,6 +63,33 @@ def test_razorpay_payment_link_adapter(test_db):
 
     assert result["success"] is True
     assert result["external_ref"] == "plink_test_12345"
+
+
+def test_razorpay_payment_link_adapter_failure_fallback(test_db):
+    """Verify that external API failure/timeout triggers resilient synthetic fallback link."""
+    merchant = Merchant(id="merch_rzp_fail_1", name="Fail Merch", email="fail@merch.io")
+    opp = RevenueOpportunity(
+        id="opp_rzp_fail_1",
+        merchant_id=merchant.id,
+        amount_at_risk=Decimal("1500.00"),
+        source_type="razorpay",
+        currency="INR"
+    )
+    intervention = Intervention(
+        id="intv_rzp_fail_1",
+        opportunity_id=opp.id,
+        action_type="payment_link"
+    )
+    test_db.add_all([merchant, opp, intervention])
+    test_db.flush()
+
+    adapter = RazorpayPaymentLinkAdapter()
+    with patch("services.action_executor.razorpay_adapter.requests.post", side_effect=Exception("Gateway Timeout")):
+        result = adapter.execute(opp, intervention, test_db)
+
+    assert result["success"] is True
+    assert result["external_ref"].startswith("plink_")
+    assert result["payload"]["fallback"] is True
 
 
 def test_email_reminder_adapter(test_db):

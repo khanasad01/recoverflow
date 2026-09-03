@@ -93,6 +93,31 @@ def test_smart_retry_adapter(day10_db):
     assert result["payload"]["strategy"] == "exponential_backoff_with_jitter"
 
 
+def test_smart_retry_adapter_failure_fallback(day10_db):
+    """Verify that orders API network exception triggers resilient fallback scheduling."""
+    from unittest.mock import patch
+    opp = RevenueOpportunity(
+        id="opp_retry_fail_test",
+        merchant_id="merch_1",
+        source_type="razorpay",
+        amount_at_risk=Decimal("1200.00"),
+        failure_reason="bank_error",
+        status="OPEN"
+    )
+    inv = Intervention(id="inv_retry_fail", opportunity_id=opp.id, action_type="smart_retry")
+    day10_db.add_all([opp, inv])
+    day10_db.commit()
+
+    adapter = SmartRetryAdapter()
+    with patch("services.action_executor.smart_retry.requests.post", side_effect=Exception("Razorpay Orders API Down")):
+        result = adapter.execute(opp, inv, day10_db)
+
+    assert result["success"] is True
+    assert result["external_ref"].startswith("retry_")
+    assert result["payload"]["fallback"] is True
+    assert result["payload"]["strategy"] == "exponential_backoff_with_jitter"
+
+
 def test_incentive_adapter(day10_db):
     opp = RevenueOpportunity(
         id="opp_inc_test",
