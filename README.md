@@ -176,6 +176,45 @@ npm run build
 
 ---
 
+---
+
+## 🔄 CI/CD Pipeline & Deployment
+
+RecoverFlow includes an automated GitHub Actions CI/CD pipeline:
+
+### Workflows
+- **Backend Continuous Deployment** (`.github/workflows/deploy.yml`):
+  - Automatically triggers on pushes to `main` modifying backend directories (`apps/**`, `services/**`, `database/**`, `integrations/**`, `requirements.txt`, `docker-compose.yml`).
+  - Deploys via SSH to the AWS EC2 production host (`13.222.186.232`).
+  - Pulls the latest code and executes `docker compose up -d --build`.
+- **Frontend Continuous Integration** (`.github/workflows/frontend-deploy.yml`):
+  - Triggers on pushes touching `dashboard/**`.
+  - Verifies production Next.js compilation (`npm run build`).
+  - Netlify automatically deploys the production build to [https://recoverflows.netlify.app](https://recoverflows.netlify.app).
+
+### GitHub Secrets Configuration
+To enable the EC2 SSH deployment workflow:
+1. In the GitHub repository, open **Settings** → **Secrets and variables** → **Actions**.
+2. Click **New repository secret**.
+3. **Name**: `EC2_SSH_KEY`
+4. **Secret**: Paste the full content of your EC2 `.pem` private key file.
+
+---
+
+## 📊 Benchmark & Load Testing
+
+Benchmark performance reports generated using **Grafana k6 (v2.2.0)** on AWS EC2 backend infrastructure:
+- **Full Report**: [tests/LOAD_TEST_RESULTS.md](file:///c:/Users/ASUS/Downloads/recoverflow/tests/LOAD_TEST_RESULTS.md)
+- **Health Ingress**: 1,437 requests, 46.35 req/s, **0.00% errors**, **p95 = 211.88ms**.
+- **Auth & Opportunities Ingress**: 328 requests, 20 concurrent VUs, **100% checks succeeded**, **0.00% errors**.
+
+---
+
+## 📑 Hackathon Submission
+- Comprehensive submission details, architecture rationale, and failure recovery matrices are documented in [SUBMISSION.md](file:///c:/Users/ASUS/Downloads/recoverflow/SUBMISSION.md).
+
+---
+
 ## ☸️ Kubernetes Deployment
 
 Production-ready Kubernetes manifests are located in `k8s/`:
@@ -190,10 +229,4 @@ kubectl apply -f k8s/
 
 ---
 
-## 📚 Documentation Links
-- [3-Minute Live Demo Script](file:///c:/Users/ASUS/Downloads/recoverflow/docs/final_demo_script.md)
-- [Comprehensive Implementation Walkthrough](file:///C:/Users/ASUS/.gemini/antigravity/brain/02a4bcb0-fba8-4b4a-a6ca-68f5efb9ba9a/walkthrough.md)
-- [Day 12 & 13 Implementation Plans](file:///C:/Users/ASUS/.gemini/antigravity/brain/02a4bcb0-fba8-4b4a-a6ca-68f5efb9ba9a/implementation_plan.md)
-
----
 *Built with Python 3.11, FastAPI, LangGraph, Scikit-Learn, Celery, Redis, PostgreSQL, Next.js 14, and Tailwind CSS.*

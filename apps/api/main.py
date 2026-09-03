@@ -202,6 +202,7 @@ def startup_event():
 
 
 @app.get("/health")
+@app.get("/api/v1/health")
 def health():
     """Public healthcheck probe for Docker/Kubernetes container orchestration."""
     return {"status": "ok"}
