@@ -1,4 +1,4 @@
-import { getToken } from "./auth";
+import { getToken, AUTH_TOKEN_KEY, AUTH_USER_KEY } from "./auth";
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -283,6 +283,16 @@ function getMockDataForUrl(url: string) {
   return {};
 }
 
+function handleAuthUnauthorized(): void {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(AUTH_USER_KEY);
+    if (window.location.pathname !== "/login") {
+      window.location.href = "/login";
+    }
+  }
+}
+
 export const fetcher = async (url: string) => {
   const fullUrl = url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
   const token = getToken();
@@ -294,39 +304,42 @@ export const fetcher = async (url: string) => {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
+  let res: Response;
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    const res = await fetch(fullUrl, { headers, signal: controller.signal });
+    res = await fetch(fullUrl, { headers, signal: controller.signal });
     clearTimeout(timeoutId);
-
-    if (res.status === 401 && typeof window !== "undefined") {
-      // Allow demo viewing without forced redirect
-      return getMockDataForUrl(url);
-    }
-
-    if (res.ok) {
-      return await res.json();
-    }
-
-    // If we get here, we have an HTTP error status (like 401, 403, etc.)
-    // Throw an error so callers can handle it appropriately
-    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-  } catch (error) {
-    // Backend offline or unreachable: gracefully return rich mock data
+  } catch (networkError) {
+    // Only return mock data for network errors (backend offline)
     if (typeof window !== "undefined") {
+      console.warn("Backend offline or unreachable, falling back to mock data:", networkError);
       return getMockDataForUrl(url);
     }
-    throw error;
+    throw networkError;
   }
+
+  // Real backend is accessible: do NOT return mock data
+  if (res.status === 401) {
+    handleAuthUnauthorized();
+    throw new Error("Unauthorized (401): Please log in.");
+  }
+
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => null);
+    const detail = errorBody?.detail || errorBody?.message || res.statusText;
+    throw new Error(`HTTP ${res.status}: ${detail}`);
+  }
+
+  return await res.json();
 };
 
 export async function loginUser(email: string, password: string) {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
 
+  try {
     const res = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -339,13 +352,12 @@ export async function loginUser(email: string, password: string) {
       return await res.json();
     }
 
-    // If we get an HTTP error, throw it so the caller can handle it
     const errorData = await res.json().catch(() => ({}));
     throw new Error(
-      errorData.message || `Login failed: ${res.status} ${res.statusText}`
+      errorData.detail || errorData.message || `Login failed: ${res.status} ${res.statusText}`
     );
   } catch (error) {
-    // Re-throw network errors or our HTTP errors
+    clearTimeout(timeoutId);
     throw error;
   }
 }
@@ -451,12 +463,16 @@ export async function triggerManualAction(
   decisionReason = "Manual dashboard trigger",
   confidence = 1.0
 ): Promise<Intervention> {
-  try {
-    const token = getToken();
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (token) headers["Authorization"] = `Bearer ${token}`;
+  const token = getToken();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
-    const res = await fetch(`${API_BASE_URL}/api/v1/opportunities/${opportunityId}/action`, {
+  let res: Response;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    res = await fetch(`${API_BASE_URL}/api/v1/opportunities/${opportunityId}/action`, {
       method: "POST",
       headers,
       body: JSON.stringify({
@@ -464,23 +480,12 @@ export async function triggerManualAction(
         decision_reason: decisionReason,
         confidence: confidence,
       }),
+      signal: controller.signal,
     });
-
-    // Handle HTTP errors consistently with fetcher
-    if (res.status === 401 && typeof window !== "undefined") {
-      // Return mock data for demo viewing
-      return getMockDataForUrl(`/api/v1/opportunities/${opportunityId}/action`) as unknown as Intervention;
-    }
-
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    // For demo purposes, return mock intervention on error
-    // In production, you might want to re-throw or handle differently
+    clearTimeout(timeoutId);
+  } catch (networkError) {
     if (typeof window !== "undefined") {
+      console.warn("Backend offline during triggerManualAction:", networkError);
       return {
         id: `INT_${Date.now().toString().slice(-5)}`,
         opportunity_id: opportunityId,
@@ -493,60 +498,82 @@ export async function triggerManualAction(
         created_at: new Date().toISOString(),
       };
     }
-    throw error;
+    throw networkError;
   }
+
+  if (res.status === 401) {
+    handleAuthUnauthorized();
+    throw new Error("Unauthorized (401): Please log in.");
+  }
+
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => null);
+    const detail = errorBody?.detail || errorBody?.message || res.statusText;
+    throw new Error(`HTTP ${res.status}: ${detail}`);
+  }
+
+  return await res.json();
 }
 
 export async function updatePolicyYaml(yamlContent: string): Promise<PolicyData> {
-  try {
-    const token = getToken();
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (token) headers["Authorization"] = `Bearer ${token}`;
+  const token = getToken();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
-    const res = await fetch(`${API_BASE_URL}/api/v1/policy`, {
+  let res: Response;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    res = await fetch(`${API_BASE_URL}/api/v1/policy`, {
       method: "PUT",
       headers,
       body: JSON.stringify({ yaml_content: yamlContent }),
+      signal: controller.signal,
     });
-    if (res.ok) return await res.json();
-
-    // Handle HTTP errors consistently with fetcher
-    if (res.status === 401 && typeof window !== "undefined") {
-      return getMockDataForUrl("/api/v1/policy") as unknown as PolicyData;
-    }
-
-    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-  } catch (error) {
+    clearTimeout(timeoutId);
+  } catch (networkError) {
     if (typeof window !== "undefined") {
       return {
         yaml_content: yamlContent,
         parsed: { updated_at: new Date().toISOString() },
       };
     }
-    throw error;
+    throw networkError;
   }
+
+  if (res.status === 401) {
+    handleAuthUnauthorized();
+    throw new Error("Unauthorized (401): Please log in.");
+  }
+
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => null);
+    const detail = errorBody?.detail || errorBody?.message || res.statusText;
+    throw new Error(`HTTP ${res.status}: ${detail}`);
+  }
+
+  return await res.json();
 }
 
 export async function createExperiment(data: { name: string; treatment_percent?: number; metric?: string }): Promise<Experiment> {
-  try {
-    const token = getToken();
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (token) headers["Authorization"] = `Bearer ${token}`;
+  const token = getToken();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
-    const res = await fetch(`${API_BASE_URL}/api/v1/experiments`, {
+  let res: Response;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    res = await fetch(`${API_BASE_URL}/api/v1/experiments`, {
       method: "POST",
       headers,
       body: JSON.stringify(data),
+      signal: controller.signal,
     });
-    if (res.ok) return await res.json();
-
-    // Handle HTTP errors consistently with fetcher
-    if (res.status === 401 && typeof window !== "undefined") {
-      return getMockDataForUrl("/api/v1/experiments") as unknown as Experiment;
-    }
-
-    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-  } catch (error) {
+    clearTimeout(timeoutId);
+  } catch (networkError) {
     if (typeof window !== "undefined") {
       return {
         id: `EXP_${Date.now().toString().slice(-4)}`,
@@ -558,29 +585,40 @@ export async function createExperiment(data: { name: string; treatment_percent?:
         updated_at: new Date().toISOString(),
       };
     }
-    throw error;
+    throw networkError;
   }
+
+  if (res.status === 401) {
+    handleAuthUnauthorized();
+    throw new Error("Unauthorized (401): Please log in.");
+  }
+
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => null);
+    const detail = errorBody?.detail || errorBody?.message || res.statusText;
+    throw new Error(`HTTP ${res.status}: ${detail}`);
+  }
+
+  return await res.json();
 }
 
 export async function approveOpportunity(opportunityId: string): Promise<Opportunity> {
-  try {
-    const token = getToken();
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (token) headers["Authorization"] = `Bearer ${token}`;
+  const token = getToken();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
-    const res = await fetch(`${API_BASE_URL}/api/v1/opportunities/${opportunityId}/approve`, {
+  let res: Response;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    res = await fetch(`${API_BASE_URL}/api/v1/opportunities/${opportunityId}/approve`, {
       method: "POST",
       headers,
+      signal: controller.signal,
     });
-    if (res.ok) return await res.json();
-
-    // Handle HTTP errors consistently with fetcher
-    if (res.status === 401 && typeof window !== "undefined") {
-      return getMockDataForUrl(`/api/v1/opportunities/${opportunityId}/approve`) as unknown as Opportunity;
-    }
-
-    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-  } catch (error) {
+    clearTimeout(timeoutId);
+  } catch (networkError) {
     if (typeof window !== "undefined") {
       const match = MOCK_OPPORTUNITIES.find((o) => o.id === opportunityId) || MOCK_OPPORTUNITIES[0];
       return {
@@ -590,29 +628,40 @@ export async function approveOpportunity(opportunityId: string): Promise<Opportu
         updated_at: new Date().toISOString(),
       };
     }
-    throw error;
+    throw networkError;
   }
+
+  if (res.status === 401) {
+    handleAuthUnauthorized();
+    throw new Error("Unauthorized (401): Please log in.");
+  }
+
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => null);
+    const detail = errorBody?.detail || errorBody?.message || res.statusText;
+    throw new Error(`HTTP ${res.status}: ${detail}`);
+  }
+
+  return await res.json();
 }
 
 export async function rejectOpportunity(opportunityId: string): Promise<Opportunity> {
-  try {
-    const token = getToken();
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (token) headers["Authorization"] = `Bearer ${token}`;
+  const token = getToken();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
-    const res = await fetch(`${API_BASE_URL}/api/v1/opportunities/${opportunityId}/reject`, {
+  let res: Response;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    res = await fetch(`${API_BASE_URL}/api/v1/opportunities/${opportunityId}/reject`, {
       method: "POST",
       headers,
+      signal: controller.signal,
     });
-    if (res.ok) return await res.json();
-
-    // Handle HTTP errors consistently with fetcher
-    if (res.status === 401 && typeof window !== "undefined") {
-      return getMockDataForUrl(`/api/v1/opportunities/${opportunityId}/reject`) as unknown as Opportunity;
-    }
-
-    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-  } catch (error) {
+    clearTimeout(timeoutId);
+  } catch (networkError) {
     if (typeof window !== "undefined") {
       const match = MOCK_OPPORTUNITIES.find((o) => o.id === opportunityId) || MOCK_OPPORTUNITIES[0];
       return {
@@ -622,6 +671,19 @@ export async function rejectOpportunity(opportunityId: string): Promise<Opportun
         updated_at: new Date().toISOString(),
       };
     }
-    throw error;
+    throw networkError;
   }
+
+  if (res.status === 401) {
+    handleAuthUnauthorized();
+    throw new Error("Unauthorized (401): Please log in.");
+  }
+
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => null);
+    const detail = errorBody?.detail || errorBody?.message || res.statusText;
+    throw new Error(`HTTP ${res.status}: ${detail}`);
+  }
+
+  return await res.json();
 }

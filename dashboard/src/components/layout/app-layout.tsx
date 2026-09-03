@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
 import { ShellProvider, useShell } from "./shell-context";
-import { isAuthenticated, setToken, setUser } from "@/lib/auth";
+import { isAuthenticated } from "@/lib/auth";
 import { X } from "lucide-react";
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
@@ -59,15 +59,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isAuthenticated()) {
-      // Auto-provision demo admin credentials so dashboard is immediately functional
-      setToken("demo_live_admin_token");
-      setUser({
-        id: "usr_admin",
-        email: "admin@recoverflow.dev",
-        full_name: "Finance Administrator",
-        role: "admin",
-        is_active: true,
-      });
+      router.replace("/login");
     }
   }, [router]);
 

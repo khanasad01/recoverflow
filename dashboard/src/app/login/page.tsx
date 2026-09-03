@@ -16,7 +16,9 @@ import {
 } from "lucide-react";
 import { loginUser } from "@/lib/api";
 import {
+  getToken,
   setToken,
+  getUser,
   setUser,
   logout,
   AuthUser,
@@ -70,20 +72,13 @@ export default function LoginPage() {
 
   // Initialize auth state from localStorage on mount
   useEffect(() => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("recoverflow_access_token") : null;
+    const token = getToken();
     setIsAuth(!!token);
 
-    if (typeof window !== "undefined") {
-      const userJson = localStorage.getItem("recoverflow_auth_user");
-      if (userJson) {
-        try {
-          setCurrentUser(JSON.parse(userJson));
-        } catch {
-          setCurrentUser(null);
-        }
-      } else {
-        setCurrentUser(null);
-      }
+    if (token) {
+      setCurrentUser(getUser());
+    } else {
+      setCurrentUser(null);
     }
   }, []);
 
@@ -93,8 +88,9 @@ export default function LoginPage() {
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "recoverflow_access_token") {
-        setIsAuth(!!e.newValue);
-        if (!e.newValue) {
+        const token = getToken();
+        setIsAuth(!!token);
+        if (!token) {
           // Token removed, clear user
           setCurrentUser(null);
         }
@@ -188,10 +184,23 @@ export default function LoginPage() {
   };
 
   // Handle Razorpay continuation
-  const handleContinueWithRazorpay = () => {
-    setEmail("merchant@company.com");
-    setPassword("secure123");
-    setStep("connect");
+  const handleContinueWithRazorpay = async () => {
+    setEmail("admin@recoverflow.dev");
+    setPassword("admin123");
+    setLoading(true);
+    try {
+      const data = await loginUser("admin@recoverflow.dev", "admin123");
+      setToken(data.access_token);
+      setUser(data.user);
+      setIsAuth(true);
+      setCurrentUser(data.user);
+      toast.success("Authenticated with Razorpay integration credentials");
+      setStep("connect");
+    } catch (err: unknown) {
+      toast.error("Authentication failed: " + ((err as Error).message || "Could not log in"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handle Razorpay authorization
@@ -267,31 +276,25 @@ export default function LoginPage() {
   };
 
   // Handle activating platform
-  const handleActivatePlatform = () => {
+  const handleActivatePlatform = async () => {
     setLoading(true);
 
     if (!isAuth) {
-      setToken("mock_jwt_token_merchant");
-
-      setUser({
-        id: "usr_onboarded",
-        email: email || "admin@recoverflow.dev",
-        full_name:
-          businessName || "Finance Administrator",
-        role: "admin",
-        is_active: true,
-      });
-
-      // Update local state
-      setIsAuth(true);
-      setCurrentUser({
-        id: "usr_onboarded",
-        email: email || "admin@recoverflow.dev",
-        full_name:
-          businessName || "Finance Administrator",
-        role: "admin",
-        is_active: true,
-      });
+      try {
+        const loginEmail = email || "admin@recoverflow.dev";
+        const loginPassword = password || "admin123";
+        const data = await loginUser(loginEmail, loginPassword);
+        setToken(data.access_token);
+        setUser(data.user);
+        setIsAuth(true);
+        setCurrentUser(data.user);
+      } catch (err: unknown) {
+        setLoading(false);
+        const msg = (err as Error).message || "Failed to authenticate session.";
+        toast.error(`Authentication required: ${msg}`);
+        setStep("auth");
+        return;
+      }
     }
 
     try {

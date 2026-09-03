@@ -11,7 +11,13 @@ export const AUTH_USER_KEY = "recoverflow_auth_user";
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(AUTH_TOKEN_KEY);
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  if (token && (token.startsWith("mock_") || token.startsWith("demo_"))) {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(AUTH_USER_KEY);
+    return null;
+  }
+  return token;
 }
 
 export function setToken(token: string): void {
