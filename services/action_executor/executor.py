@@ -9,6 +9,7 @@ from database.models import RevenueOpportunity, Intervention, Outcome
 from services.action_executor.base import ActionAdapter
 from services.action_executor.razorpay_adapter import RazorpayPaymentLinkAdapter
 from services.action_executor.email_adapter import EmailReminderAdapter
+from services.action_executor.whatsapp_adapter import WhatsAppReminderAdapter
 from services.action_executor.human_escalation import HumanEscalationAdapter
 from services.action_executor.smart_retry import SmartRetryAdapter
 from services.action_executor.incentive import IncentiveAdapter
@@ -30,6 +31,8 @@ class ActionExecutor:
             "payment_link": RazorpayPaymentLinkAdapter(),
             "payment_link_create": RazorpayPaymentLinkAdapter(),
             "email_reminder": EmailReminderAdapter(),
+            "whatsapp": WhatsAppReminderAdapter(),
+            "whatsapp_reminder": WhatsAppReminderAdapter(),
             "email": EmailReminderAdapter(),
             "human_escalation": HumanEscalationAdapter(),
             "escalate": HumanEscalationAdapter(),
