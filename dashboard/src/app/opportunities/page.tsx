@@ -14,6 +14,7 @@ import {
   Mail,
   Zap,
   MessageSquare,
+  ExternalLink,
 } from "lucide-react";
 import {
   fetcher,
@@ -60,6 +61,27 @@ function OpportunitiesContent() {
   const [density, setDensity] = useState<"comfortable" | "compact">(storedDensity);
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
   const [actionLoading, setActionLoading] = useState<boolean>(false);
+  const [lastActionResult, setLastActionResult] = useState<{
+    actionType: string;
+    externalRef?: string;
+    timestamp: string;
+    status: string;
+    details?: string;
+    url?: string;
+  } | null>(null);
+
+  const handleSelectOpp = async (opp: Opportunity) => {
+    setSelectedOpp(opp);
+    setLastActionResult(null);
+    try {
+      const detail = await fetcher(`/api/v1/opportunities/${opp.id}`);
+      if (detail && detail.id === opp.id) {
+        setSelectedOpp(detail);
+      }
+    } catch {
+      // Keep basic opp data if detail endpoint fails
+    }
+  };
 
   const toggleDensity = (newDensity: "comfortable" | "compact") => {
     setDensity(newDensity);
@@ -112,10 +134,63 @@ function OpportunitiesContent() {
     if (!selectedOpp) return;
     setActionLoading(true);
     try {
-      await triggerManualAction(selectedOpp.id, actionType);
-      toast.success(`Action '${actionType}' triggered for ${selectedOpp.id}`);
+      const result = await triggerManualAction(selectedOpp.id, actionType);
+
+      let detailsMsg = "";
+      let actionUrl: string | undefined = undefined;
+
+      // Show real action details based on action type
+      if (actionType === "incentive" && result.external_ref) {
+        detailsMsg = `Coupon Code: ${result.external_ref} (10% discount applied)`;
+        toast.success(`🎉 Coupon Code: ${result.external_ref} - 10% discount applied!`);
+      } else if (actionType === "payment_link" && result.external_ref) {
+        detailsMsg = `Payment Link Created: ${result.external_ref}`;
+        actionUrl = "https://dashboard.razorpay.com/app/paymentlinks";
+        toast.success(`🔗 Payment Link Created: ${result.external_ref}`, {
+          description: "Visible in Razorpay Dashboard → Payment Links",
+        });
+      } else if (actionType === "smart_retry" && result.external_ref) {
+        detailsMsg = `Smart Retry Order: ${result.external_ref}`;
+        actionUrl = "https://dashboard.razorpay.com/app/orders";
+        toast.success(`🔄 Smart Retry Scheduled: ${result.external_ref}`, {
+          description: "Order created in Razorpay Dashboard → Orders",
+        });
+      } else if (actionType === "email_reminder") {
+        detailsMsg = "Email reminder sent to customer via SendGrid";
+        toast.success(`📧 Email sent successfully to customer`);
+      } else if (actionType === "whatsapp") {
+        detailsMsg = result.external_ref
+          ? `WhatsApp message sent via Twilio (SID: ${result.external_ref})`
+          : "WhatsApp message sent successfully via Twilio";
+        toast.success(`📱 WhatsApp message sent successfully`);
+      } else {
+        detailsMsg = `Action executed successfully (${result.status || "EXECUTED"})`;
+        toast.success(`Action '${actionType}' completed`);
+      }
+
+      setLastActionResult({
+        actionType,
+        externalRef: result.external_ref,
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+        status: result.status || "EXECUTED",
+        details: detailsMsg,
+        url: actionUrl,
+      });
+
+      // Update the local selectedOpp interventions list so the Evidence Timeline updates immediately
+      setSelectedOpp((prev) => {
+        if (!prev) return null;
+        const updatedInterventions = [result, ...(prev.interventions || [])];
+        return {
+          ...prev,
+          retry_count: (prev.retry_count || 0) + 1,
+          status: prev.status === "READY" || prev.status === "OPEN" ? "ACTIONED" : prev.status,
+          interventions: updatedInterventions,
+        };
+      });
+
       await mutate();
-      setSelectedOpp(null);
+      // Keep drawer open so user can inspect the real action result
     } catch (err: unknown) {
       toast.error((err as Error).message || "Failed to trigger recovery action.");
     } finally {
@@ -129,8 +204,15 @@ function OpportunitiesContent() {
     try {
       await approveOpportunity(selectedOpp.id);
       toast.success(`Opportunity ${selectedOpp.id} approved!`);
+      setSelectedOpp((prev) => (prev ? { ...prev, status: "APPROVED" } : null));
+      setLastActionResult({
+        actionType: "human_approval",
+        externalRef: `appr_${selectedOpp.id}`,
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+        status: "APPROVED",
+        details: "Approved by finance administrator and dispatched to execution rail",
+      });
       await mutate();
-      setSelectedOpp(null);
     } catch (err: unknown) {
       toast.error((err as Error).message || "Failed to approve opportunity.");
     } finally {
@@ -144,8 +226,15 @@ function OpportunitiesContent() {
     try {
       await rejectOpportunity(selectedOpp.id);
       toast.success(`Opportunity ${selectedOpp.id} rejected.`);
+      setSelectedOpp((prev) => (prev ? { ...prev, status: "FAILED" } : null));
+      setLastActionResult({
+        actionType: "human_rejection",
+        externalRef: `rej_${selectedOpp.id}`,
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+        status: "REJECTED",
+        details: "Rejected by finance administrator",
+      });
       await mutate();
-      setSelectedOpp(null);
     } catch (err: unknown) {
       toast.error((err as Error).message || "Failed to reject opportunity.");
     } finally {
@@ -153,15 +242,29 @@ function OpportunitiesContent() {
     }
   };
 
-  const opportunityEvidence: EvidenceEvent[] = (selectedOpp?.interventions || []).map((intv) => ({
-    id: intv.id,
-    opportunity_id: intv.opportunity_id,
-    intervention_id: intv.id,
-    event_type: intv.action_type.toUpperCase(),
-    actor: "LangGraph Agent",
-    reason: intv.decision_reason || `Intervention ${intv.action_type} executed`,
-    created_at: intv.created_at,
-  }));
+  const opportunityEvidence: EvidenceEvent[] = (selectedOpp?.interventions || []).map((intv) => {
+    let reasonText = intv.decision_reason || `Intervention ${intv.action_type} executed`;
+    if (intv.external_ref) {
+      if (intv.action_type === "incentive") {
+        reasonText += ` (Coupon: ${intv.external_ref})`;
+      } else if (intv.action_type === "payment_link") {
+        reasonText += ` (Link ID: ${intv.external_ref})`;
+      } else if (intv.action_type === "smart_retry") {
+        reasonText += ` (Razorpay Order: ${intv.external_ref})`;
+      } else {
+        reasonText += ` (Ref: ${intv.external_ref})`;
+      }
+    }
+    return {
+      id: intv.id,
+      opportunity_id: intv.opportunity_id,
+      intervention_id: intv.id,
+      event_type: intv.action_type.toUpperCase(),
+      actor: "LangGraph Agent",
+      reason: reasonText,
+      created_at: intv.created_at,
+    };
+  });
 
   return (
     <AppLayout>
@@ -312,7 +415,7 @@ function OpportunitiesContent() {
                     return (
                       <tr
                         key={opp.id}
-                        onClick={() => setSelectedOpp(opp)}
+                        onClick={() => handleSelectOpp(opp)}
                         className={`cursor-pointer transition-colors ${isSelected ? "bg-[#F1F4F9]" : ""}`}
                       >
                         <td className="font-mono font-semibold text-[#1E5EFF]">
@@ -370,7 +473,10 @@ function OpportunitiesContent() {
           <div className="fixed inset-0 z-50 flex justify-end">
             <div
               className="fixed inset-0 bg-[#0A2540]/40 backdrop-blur-xs transition-opacity"
-              onClick={() => setSelectedOpp(null)}
+              onClick={() => {
+                setSelectedOpp(null);
+                setLastActionResult(null);
+              }}
             />
 
             <div className="relative w-full max-w-[480px] bg-white h-full shadow-[0_32px_64px_rgba(10,37,64,0.16)] flex flex-col z-10 animate-in slide-in-from-right duration-200">
@@ -380,7 +486,10 @@ function OpportunitiesContent() {
                   <StatusBadge status={selectedOpp.status} size="sm" />
                 </div>
                 <button
-                  onClick={() => setSelectedOpp(null)}
+                  onClick={() => {
+                    setSelectedOpp(null);
+                    setLastActionResult(null);
+                  }}
                   aria-label="Close drawer"
                   className="p-1.5 rounded-lg text-[#5B6B84] hover:text-[#0F172A] hover:bg-[#E5E9F0] transition-colors"
                 >
@@ -437,6 +546,73 @@ function OpportunitiesContent() {
                     </div>
                   </div>
                 </div>
+
+                {/* Last Action Result Banner */}
+                {lastActionResult && (
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-[#1E5EFF]/08 via-[#635BFF]/05 to-[#00C48C]/08 border border-[#1E5EFF]/20 space-y-2.5 animate-in fade-in duration-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-[#00C48C] animate-pulse" />
+                        <span className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
+                          Last Action Result
+                        </span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#00C48C]/15 text-[#008760]">
+                        {lastActionResult.status}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#5B6B84]">Action Rail:</span>
+                        <span className="font-semibold text-[#0F172A] capitalize">
+                          {lastActionResult.actionType.replace(/_/g, " ")}
+                        </span>
+                      </div>
+
+                      {lastActionResult.externalRef && (
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[#5B6B84] shrink-0">
+                            {lastActionResult.actionType === "incentive"
+                              ? "Coupon Code:"
+                              : lastActionResult.actionType === "payment_link"
+                              ? "Payment Link ID:"
+                              : lastActionResult.actionType === "smart_retry"
+                              ? "Razorpay Order ID:"
+                              : "Reference ID:"}
+                          </span>
+                          <span className="font-mono font-bold text-[#1E5EFF] bg-white px-2 py-0.5 rounded border border-[#E5E9F0] truncate">
+                            {lastActionResult.externalRef}
+                          </span>
+                        </div>
+                      )}
+
+                      {lastActionResult.details && (
+                        <div className="text-[11px] text-[#5B6B84] pt-1 border-t border-[#E5E9F0]/60">
+                          {lastActionResult.details}
+                        </div>
+                      )}
+
+                      {lastActionResult.url && (
+                        <div className="pt-1">
+                          <a
+                            href={lastActionResult.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#1E5EFF] hover:underline"
+                          >
+                            <span>View in Razorpay Dashboard</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                      )}
+
+                      <div className="text-[10px] text-[#94A3B8] text-right font-mono pt-1">
+                        Dispatched at {lastActionResult.timestamp}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <WhyCard opportunity={selectedOpp} evidenceList={opportunityEvidence} />
 
