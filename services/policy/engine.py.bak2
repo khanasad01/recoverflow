@@ -30,7 +30,7 @@ class PolicyEngine:
                 "payment_link": {
                     "max_amount": 10000,
                     "allowed_failure_reasons": ["insufficient_funds", "card_declined", "payment_failed", "bad_request_error"],
-                    "max_attempts": 10
+                    "max_attempts": 3
                 },
                 "email_reminder": {
                     "max_amount": 50000,
@@ -39,28 +39,28 @@ class PolicyEngine:
                 },
                 "smart_retry": {
                     "max_amount": 50000,
-                    "allowed_failure_reasons": ["bank_error", "network_issue", "gateway_timeout", "temporary_error", "card_declined"],
-                    "max_attempts": 10
+                    "allowed_failure_reasons": ["bank_error", "network_issue", "gateway_timeout", "temporary_error"],
+                    "max_attempts": 3
                 },
                 "incentive": {
                     "max_amount": 50000,
                     "allowed_failure_reasons": ["card_declined", "insufficient_funds"],
-                    "max_attempts": 10
+                    "max_attempts": 2
                 },
                 "subscription_recovery": {
                     "max_amount": 50000,
                     "allowed_failure_reasons": None,
-                    "max_attempts": 10
+                    "max_attempts": 4
                 },
                 "upi_qr": {
                     "max_amount": 10000,
                     "allowed_failure_reasons": ["insufficient_funds", "card_declined", "payment_failed", "bad_request_error", "bank_error", "network_issue"],
-                    "max_attempts": 10
+                    "max_attempts": 3
                 },
                 "payment_method_recovery": {
                     "max_amount": 20000,
                     "allowed_failure_reasons": ["insufficient_funds", "card_declined", "payment_failed", "bad_request_error", "bank_error", "network_issue", "expired_card", "card_expired"],
-                    "max_attempts": 10
+                    "max_attempts": 3
                 },
                 "stop": {
                     "max_amount": 10000000,
@@ -70,12 +70,12 @@ class PolicyEngine:
                 "voice_call": {
                     "max_amount": 5000,
                     "allowed_failure_reasons": ["insufficient_funds", "payment_failed", "bank_error", "card_declined"],
-                    "max_attempts": 10
+                    "max_attempts": 2
                 },
                 "human_escalation": {
                     "max_amount": 1000000,
                     "allowed_failure_reasons": None,
-                    "max_attempts": 10
+                    "max_attempts": 3
                 }
             }
         }
