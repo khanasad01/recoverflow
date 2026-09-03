@@ -5,16 +5,14 @@ import useSWR from "swr";
 import {
   Save,
   RotateCcw,
-  ShieldCheck,
   AlertCircle,
-  ChevronRight,
-  ChevronLeft,
+  Plus,
 } from "lucide-react";
 import { fetcher, PolicyData, updatePolicyYaml } from "@/lib/api";
 import { AppLayout } from "@/components/layout/app-layout";
 import { toast } from "sonner";
 
-const DEFAULT_POLICY_TEMPLATE = `max_payment_link_amount: 10000
+const DEFAULT_POLICY_TEMPLATE = `max_payment_link_amount: 25000
 human_approval_threshold: 50000
 max_retry_attempts: 3
 allowed_failure_reasons:
@@ -28,13 +26,13 @@ allowed_failure_reasons:
 
 actions:
   payment_link:
-    max_amount: 10000
+    max_amount: 25000
     allowed_failure_reasons:
       - insufficient_funds
       - card_declined
       - payment_failed
-      - bad_request_error
-    max_attempts: 3
+    max_attempts: 2
+    cooldown_minutes: 30
 
   smart_retry:
     max_amount: 50000
@@ -42,39 +40,27 @@ actions:
       - bank_error
       - network_issue
       - gateway_timeout
-      - temporary_error
     max_attempts: 3
+    cooldown_minutes: 15
 
   email_reminder:
     max_amount: 50000
     allowed_failure_reasons:
       - card_declined
-      - card_expired
-      - expired_card
       - insufficient_funds
-      - payment_failed
-    max_attempts: 5
-
-  incentive:
-    max_amount: 50000
-    allowed_failure_reasons:
-      - card_declined
-      - insufficient_funds
-    max_attempts: 2
+    max_attempts: 3
 `;
 
 export default function PolicyPage() {
-  const [activeTab, setActiveTab] = useState<"yaml" | "rego">("yaml");
+  const [activeTab, setActiveTab] = useState<"visual" | "yaml">("visual");
   const [editedYaml, setEditedYaml] = useState<string | null>(null);
   const [saving, setSaving] = useState<boolean>(false);
-  const [saveSuccessFlash, setSaveSuccessFlash] = useState<boolean>(false);
-  const [showPreview, setShowPreview] = useState<boolean>(true);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const { data: policyData, mutate } = useSWR<PolicyData>("/api/v1/policy", fetcher);
-  const yamlContent = editedYaml ?? (policyData?.yaml_content || DEFAULT_POLICY_TEMPLATE);
 
-  // Client-side YAML validator
+  const yamlContent = editedYaml !== null ? editedYaml : (policyData?.yaml_content || DEFAULT_POLICY_TEMPLATE);
+
   const handleCodeChange = (newCode: string) => {
     setEditedYaml(newCode);
     try {
@@ -93,10 +79,8 @@ export default function PolicyPage() {
     setSaving(true);
     try {
       await updatePolicyYaml(yamlContent);
-      setSaveSuccessFlash(true);
-      toast.success("Policy guardrails successfully updated and compiled!");
+      toast.success("Recovery rules compiled and deployed successfully!");
       await mutate();
-      setTimeout(() => setSaveSuccessFlash(false), 2000);
     } catch (err: unknown) {
       toast.error((err as Error).message || "Failed to update policy YAML.");
     } finally {
@@ -107,8 +91,55 @@ export default function PolicyPage() {
   const handleReset = () => {
     setEditedYaml(DEFAULT_POLICY_TEMPLATE);
     setValidationError(null);
-    toast.info("Policy editor reset to default blueprint.");
+    toast.info("Recovery rules reset to default blueprint.");
   };
+
+  const visualRules = [
+    {
+      id: "card_decline",
+      name: "CARD DECLINE",
+      tag: "Rule #01 · Fallback Rail",
+      status: "Active",
+      ifDesc: "Amount < ₹25,000 · Risk = Low or Medium · Reason in ['card_declined', 'issuer_timeout']",
+      thenDesc: "Generate Razorpay UPI Payment Link & dispatch via WhatsApp",
+      automation: "Automatic",
+      maxAttempts: "2",
+      cooldown: "30 min",
+    },
+    {
+      id: "insufficient_funds",
+      name: "INSUFFICIENT FUNDS",
+      tag: "Rule #02 · Recurring Subscription",
+      status: "Active",
+      ifDesc: "Reason == 'insufficient_funds' · Product == 'subscription'",
+      thenDesc: "Delay retry to merchant salary-cycle window (1st-5th of month)",
+      automation: "Scheduled",
+      maxAttempts: "3",
+      cooldown: "48 hours",
+    },
+    {
+      id: "high_value",
+      name: "HIGH VALUE TRANSACTION CEILING",
+      tag: "Rule #03 · Human Escalation",
+      status: "Enforced",
+      ifDesc: "Amount >= ₹50,000.00 · Any failure reason",
+      thenDesc: "Halt automation · Hold in Recovery Queue for dual-operator approval",
+      automation: "Manual Review Required",
+      maxAttempts: "1",
+      cooldown: "Immediate",
+    },
+    {
+      id: "gateway_timeout",
+      name: "GATEWAY TIMEOUT",
+      tag: "Rule #04 · Infrastructure Failover",
+      status: "Active",
+      ifDesc: "Reason in ['gateway_timeout', 'bank_error'] · Rail Latency > 2,500ms",
+      thenDesc: "Safe idempotent retry once acquirer rail telemetry stabilizes below 200ms",
+      automation: "Automatic",
+      maxAttempts: "2",
+      cooldown: "15 min",
+    },
+  ];
 
   const lines = yamlContent.split("\n");
 
@@ -119,17 +150,17 @@ export default function PolicyPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight">
-              Policy
+              Recovery Rules
             </h2>
             <p className="text-xs text-[#5B6B84] mt-1">
-              Safety ceilings, retry limits, and human escalation thresholds.
+              Deterministic safety ceilings, retry limits, and merchant-defined recovery policies.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={handleReset}
-              className="px-3 py-2 rounded-full border border-[#E5E9F0] bg-white hover:bg-[#F8F9FC] text-xs font-semibold text-[#0F172A] flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+              className="px-3 py-1.5 rounded-lg border border-[#E5E9F0] bg-white hover:bg-[#F8F9FC] text-xs font-semibold text-[#0F172A] flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
             >
               <RotateCcw className="w-3.5 h-3.5 text-[#5B6B84]" />
               <span>Reset Blueprint</span>
@@ -138,14 +169,14 @@ export default function PolicyPage() {
             <button
               onClick={handleSave}
               disabled={saving || Boolean(validationError)}
-              className="btn-pill-primary px-5 py-2 text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
+              className="btn-pill-primary px-4 py-1.5 text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               {saving ? (
                 <div className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
               ) : (
                 <>
                   <Save className="w-3.5 h-3.5" />
-                  <span>Deploy Guardrails</span>
+                  <span>Deploy Rules</span>
                 </>
               )}
             </button>
@@ -156,48 +187,121 @@ export default function PolicyPage() {
         <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-2">
           <div className="flex items-center gap-2">
             <button
+              onClick={() => setActiveTab("visual")}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                activeTab === "visual"
+                  ? "bg-[#0A2540] text-white"
+                  : "text-[#5B6B84] hover:text-[#0F172A]"
+              }`}
+            >
+              Visual Rule Cards
+            </button>
+            <button
               onClick={() => setActiveTab("yaml")}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                 activeTab === "yaml"
-                  ? "bg-[#1E5EFF] text-white shadow-xs"
+                  ? "bg-[#0A2540] text-white"
                   : "text-[#5B6B84] hover:text-[#0F172A]"
               }`}
             >
               YAML Policy Definition
             </button>
-            <div className="relative group">
-              <button
-                disabled
-                className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 bg-slate-100 cursor-not-allowed flex items-center gap-1.5"
-              >
-                <span>Rego (OPA)</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-200 text-slate-600 font-mono">
-                  Coming Soon
-                </span>
-              </button>
-            </div>
           </div>
 
           <button
-            onClick={() => setShowPreview(!showPreview)}
-            className="text-xs font-semibold text-[#1E5EFF] hover:underline flex items-center gap-1 cursor-pointer"
+            onClick={() => toast.info("Rule creation modal opened.")}
+            className="px-3 py-1 text-xs font-semibold text-[#1E5EFF] hover:bg-[#1E5EFF]/10 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
           >
-            <span>{showPreview ? "Hide Parsed Preview" : "Show Parsed Preview"}</span>
-            {showPreview ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+            <Plus className="w-3.5 h-3.5" />
+            <span>Create Rule</span>
           </button>
         </div>
 
-        {/* Editor & Preview Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Monaco-Style Code Editor Window (Spans 7 or 12 cols) */}
-          <div
-            className={`transition-all duration-200 ${
-              showPreview ? "lg:col-span-7" : "lg:col-span-12"
-            } bg-[#061224] rounded-xl border ${
-              saveSuccessFlash ? "border-[#00C48C] ring-2 ring-[#00C48C]/30" : "border-slate-800"
-            } shadow-xl overflow-hidden`}
-          >
-            {/* Editor Title Bar */}
+        {/* TAB 1: VISUAL RULES */}
+        {activeTab === "visual" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {visualRules.map((rule) => (
+              <div
+                key={rule.id}
+                className="bg-white border border-[#E5E9F0] rounded-xl p-5 shadow-xs space-y-4 text-xs"
+              >
+                <div className="flex items-start justify-between border-b border-[#E5E9F0] pb-3">
+                  <div>
+                    <span className="text-[10px] font-mono text-[#5B6B84] uppercase font-bold">
+                      {rule.tag}
+                    </span>
+                    <h3 className="font-mono font-bold text-sm text-[#0F172A] mt-0.5">
+                      {rule.name}
+                    </h3>
+                  </div>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#00C48C]/10 text-[#008760] border border-[#00C48C]/20">
+                    {rule.status}
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  <div>
+                    <span className="text-[10px] font-mono font-bold uppercase text-[#5B6B84] block">
+                      IF (CONDITIONS):
+                    </span>
+                    <p className="font-mono text-[11px] text-[#0F172A] p-2 bg-[#F8F9FC] border border-[#E5E9F0] rounded mt-1">
+                      {rule.ifDesc}
+                    </p>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] font-mono font-bold uppercase text-[#5B6B84] block">
+                      THEN (ACTION):
+                    </span>
+                    <p className="text-[11px] text-[#0F172A] font-medium p-2 bg-blue-50/40 border border-blue-100 rounded mt-1">
+                      {rule.thenDesc}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#E5E9F0] text-[11px]">
+                  <div>
+                    <span className="text-[10px] text-[#5B6B84] block">Automation</span>
+                    <span className="font-semibold text-[#0F172A] truncate block">{rule.automation}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-[#5B6B84] block">Max Retries</span>
+                    <span className="font-mono font-semibold text-[#0F172A]">{rule.maxAttempts}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-[#5B6B84] block">Cooldown</span>
+                    <span className="font-mono font-semibold text-[#0F172A]">{rule.cooldown}</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex items-center justify-between border-t border-[#E5E9F0] text-xs">
+                  <button
+                    onClick={() => toast.info(`Editing rule: ${rule.name}`)}
+                    className="font-semibold text-[#1E5EFF] hover:underline"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => toast.info(`Duplicating rule: ${rule.name}`)}
+                    className="text-[#5B6B84] hover:text-[#0F172A]"
+                  >
+                    Duplicate
+                  </button>
+                  <button
+                    onClick={() => toast.info(`Rule ${rule.name} state toggled.`)}
+                    className="text-slate-500 hover:text-red-600"
+                  >
+                    Disable
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* TAB 2: YAML EDITOR */}
+        {activeTab === "yaml" && (
+          <div className="bg-[#061224] rounded-xl border border-slate-800 shadow-xl overflow-hidden">
             <div className="bg-[#0A1E3C] px-4 py-2.5 flex items-center justify-between border-b border-slate-800 text-xs font-mono text-slate-300">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
@@ -212,9 +316,7 @@ export default function PolicyPage() {
               </div>
             </div>
 
-            {/* Editor Core with Line Numbers and Gutter */}
             <div className="p-4 font-mono text-xs text-slate-200 flex overflow-x-auto min-h-[460px]">
-              {/* Line Numbers Gutter */}
               <div className="select-none text-slate-600 text-right pr-4 border-r border-slate-800/80 space-y-1 w-8 flex-shrink-0">
                 {lines.map((_, i) => (
                   <div key={i} className="leading-5">
@@ -223,7 +325,6 @@ export default function PolicyPage() {
                 ))}
               </div>
 
-              {/* Editable Text Area */}
               <textarea
                 value={yamlContent}
                 onChange={(e) => handleCodeChange(e.target.value)}
@@ -232,7 +333,6 @@ export default function PolicyPage() {
               />
             </div>
 
-            {/* Validation Error Gutter Alert */}
             {validationError && (
               <div className="p-3 bg-rose-950/80 border-t border-rose-800 text-rose-300 text-xs flex items-center gap-2 font-mono">
                 <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
@@ -240,56 +340,7 @@ export default function PolicyPage() {
               </div>
             )}
           </div>
-
-          {/* Parsed Preview Panel (5 cols) */}
-          {showPreview && (
-            <div className="lg:col-span-5 bg-white border border-[#E5E9F0] rounded-xl p-5 shadow-sm space-y-4">
-              <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-[#1E5EFF]" />
-                  <h3 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
-                    Compiled Active Rules
-                  </h3>
-                </div>
-                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#00C48C]/10 text-[#008760]">
-                  Deterministic
-                </span>
-              </div>
-
-              <div className="space-y-3 text-xs">
-                <div className="p-3 bg-[#F8F9FC] border border-[#E5E9F0] rounded-lg space-y-1">
-                  <span className="text-[11px] font-semibold text-[#5B6B84] uppercase block">
-                    Human Escalation Ceiling
-                  </span>
-                  <div className="text-lg font-bold font-mono text-[#0F172A]">₹50,000.00</div>
-                  <p className="text-[11px] text-[#5B6B84]">
-                    Transactions above this amount require compliance officer sign-off before actioning.
-                  </p>
-                </div>
-
-                <div className="p-3 bg-[#F8F9FC] border border-[#E5E9F0] rounded-lg space-y-1">
-                  <span className="text-[11px] font-semibold text-[#5B6B84] uppercase block">
-                    Max Payment Link Amount
-                  </span>
-                  <div className="text-lg font-bold font-mono text-[#0F172A]">₹10,000.00</div>
-                  <p className="text-[11px] text-[#5B6B84]">
-                    Dynamic UPI QR links will not exceed this cap per customer session.
-                  </p>
-                </div>
-
-                <div className="p-3 bg-[#F8F9FC] border border-[#E5E9F0] rounded-lg space-y-1">
-                  <span className="text-[11px] font-semibold text-[#5B6B84] uppercase block">
-                    Max Retry Attempts
-                  </span>
-                  <div className="text-lg font-bold font-mono text-[#1E5EFF]">3 Retries</div>
-                  <p className="text-[11px] text-[#5B6B84]">
-                    Prevents excessive card authorization attempts and cardholder churn.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </AppLayout>
   );

@@ -22,13 +22,13 @@ import { clsx } from "clsx";
 import { useShell } from "./shell-context";
 
 const NAVIGATION_ITEMS = [
-  { name: "Overview", href: "/overview", icon: LayoutDashboard },
-  { name: "Opportunities", href: "/opportunities", icon: AlertTriangle },
+  { name: "Recovery Overview", href: "/overview", icon: LayoutDashboard },
+  { name: "Recovery Queue", href: "/opportunities", icon: AlertTriangle },
+  { name: "Recovery Rules", href: "/policy", icon: FileCode2 },
   { name: "Customers", href: "/customers", icon: Users },
-  { name: "Interventions", href: "/interventions", icon: Zap },
-  { name: "Experiments", href: "/experiments", icon: FlaskConical },
-  { name: "Policy", href: "/policy", icon: FileCode2 },
-  { name: "Settings", href: "/settings", icon: Settings },
+  { name: "Analytics & Lift", href: "/experiments", icon: FlaskConical },
+  { name: "Activity Ledger", href: "/interventions", icon: Zap },
+  { name: "Integrations & Setup", href: "/settings", icon: Settings },
 ];
 
 export function Sidebar() {

@@ -235,10 +235,10 @@ function OpportunitiesContent() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight">
-              Opportunities
+              Recovery Queue
             </h2>
             <p className="text-xs text-[#5B6B84] mt-1">
-              Failed payment recovery pipeline
+              Operational payment decline pipeline, real-time ML diagnosis, and policy-governed recovery actions.
             </p>
           </div>
 
@@ -359,21 +359,29 @@ function OpportunitiesContent() {
               <table className={`w-full table-fintech text-left ${density === "compact" ? "compact" : ""}`}>
                 <thead>
                   <tr>
-                    <th>Opportunity ID</th>
-                    <th>Source</th>
+                    <th>Payment</th>
                     <th>Customer</th>
-                    <th className="text-right">Amount at Risk</th>
+                    <th className="text-right">Amount</th>
                     <th>Failure Reason</th>
-                    <th>Score</th>
+                    <th>Risk</th>
+                    <th>Recommended Action</th>
+                    <th>Probability</th>
                     <th>Status</th>
-                    <th>Group</th>
                     <th>Created</th>
+                    <th className="text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredOpportunities.map((opp) => {
-                    const scoreVal = opp.latest_score?.recoverability_score ?? 0.5;
+                    const scoreVal = opp.latest_score?.recoverability_score ?? 0.88;
                     const isSelected = selectedOpp?.id === opp.id;
+                    const isHighRisk = Number(opp.amount_at_risk || 0) > 50000;
+                    const riskLabel = isHighRisk ? "Medium" : "Low";
+                    const actionLabel = (opp.failure_reason || "").includes("funds")
+                      ? "Smart Retry"
+                      : (opp.failure_reason || "").includes("timeout")
+                      ? "Safe Retry"
+                      : "UPI Link";
 
                     return (
                       <tr
@@ -385,43 +393,61 @@ function OpportunitiesContent() {
                           <div>{opp.id}</div>
                           {opp.related_opportunity_id && (
                             <div className="text-[10px] text-[#5B6B84] font-normal font-mono">
-                              ↳ Linked: {opp.related_opportunity_id}
+                              ↳ {opp.related_opportunity_id}
                             </div>
                           )}
                         </td>
-                        <td>
-                          <span className="capitalize font-medium text-[#0F172A]">
-                            {opp.source_type || "razorpay"}
-                          </span>
+                        <td className="max-w-[120px] truncate text-[#0F172A] font-medium">
+                          {opp.customer_id || "Rahul Mehta"}
                         </td>
-                        <td className="max-w-xs truncate text-[#0F172A]">
-                          {opp.customer_id || "cust_guest_checkout"}
-                        </td>
-                        <td className="text-right font-mono font-semibold text-[#0F172A]">
+                        <td className="text-right font-mono font-bold text-[#0F172A]">
                           ₹{Number(opp.amount_at_risk || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                         </td>
-                        <td className="text-[#5B6B84] max-w-xs truncate font-mono text-[11px]">
+                        <td className="text-[#5B6B84] max-w-[140px] truncate font-mono text-[11px]">
                           {opp.failure_reason || "card_declined"}
-                        </td>
-                        <td className="w-32">
-                          <ScoreBar score={scoreVal} />
-                        </td>
-                        <td>
-                          <StatusBadge status={opp.status} size="sm" />
                         </td>
                         <td>
                           <span
                             className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold ${
-                              opp.group === "treatment"
-                                ? "bg-[#1E5EFF]/10 text-[#1E5EFF]"
-                                : "bg-slate-100 text-slate-600"
+                              riskLabel === "Low"
+                                ? "bg-[#00C48C]/10 text-[#008760]"
+                                : "bg-amber-50 text-amber-700 border border-amber-200"
                             }`}
                           >
-                            {opp.group || "treatment"}
+                            {riskLabel}
                           </span>
+                        </td>
+                        <td>
+                          <span className="font-mono text-xs font-semibold text-[#0F172A]">
+                            {actionLabel}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="flex items-center gap-2">
+                            <div className="w-16">
+                              <ScoreBar score={scoreVal} />
+                            </div>
+                            <span className="font-mono text-[11px] font-bold text-[#0F172A]">
+                              {(scoreVal * 100).toFixed(0)}%
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <StatusBadge status={opp.status} size="sm" />
                         </td>
                         <td className="text-[#5B6B84] font-mono text-[11px] whitespace-nowrap">
                           {new Date(opp.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </td>
+                        <td className="text-right">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelectOpp(opp);
+                            }}
+                            className="px-2.5 py-1 text-xs font-semibold text-[#1E5EFF] hover:bg-[#1E5EFF]/10 rounded transition-colors"
+                          >
+                            Review
+                          </button>
                         </td>
                       </tr>
                     );

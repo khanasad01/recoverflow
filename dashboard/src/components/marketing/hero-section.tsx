@@ -8,11 +8,11 @@ import {
   AlertCircle,
   CheckCircle2,
   ShieldCheck,
-  User,
   Zap,
   ArrowUpRight,
   Clock,
   RotateCw,
+  FileCheck2,
 } from "lucide-react";
 
 export function HeroSection() {
@@ -20,12 +20,16 @@ export function HeroSection() {
   const [recoveredState, setRecoveredState] = useState(false);
 
   return (
-    <section className="relative pt-28 pb-16 lg:pt-36 lg:pb-24 bg-[#F8F9FC] border-b border-[#E5E9F0] overflow-hidden">
+    <section className="relative pt-28 pb-16 lg:pt-36 lg:pb-24 bg-[#FFFFFF] border-b border-[#E5E9F0] overflow-hidden">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
           {/* Left Column: Messaging */}
           <div className="lg:col-span-6 space-y-6">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#0F172A] tracking-tight leading-[1.12]">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#F1F5F9] border border-[#E2E8F0] text-[#0F172A] text-xs font-mono font-semibold uppercase tracking-wider">
+              <span>PAYMENT RECOVERY INFRASTRUCTURE</span>
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl lg:text-[54px] font-bold text-[#0F172A] tracking-tight leading-[1.1]">
               Failed payments don&apos;t have to become lost revenue.
             </h1>
 
@@ -37,7 +41,7 @@ export function HeroSection() {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
               <button
                 onClick={() => router.push("/overview")}
-                className="btn-pill-primary px-6 py-3 text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                className="btn-pill-primary px-6 py-3 text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-xs"
               >
                 <span>Open Recovery Console</span>
                 <ArrowRight className="w-4 h-4" />
@@ -45,40 +49,35 @@ export function HeroSection() {
 
               <Link
                 href="#how-it-works"
-                className="px-5 py-3 text-sm font-semibold text-[#0F172A] hover:bg-white rounded-full border border-[#E5E9F0] text-center transition-colors shadow-2xs"
+                className="px-5 py-3 text-sm font-semibold text-[#0F172A] hover:bg-slate-50 rounded-full border border-[#E5E9F0] text-center transition-colors shadow-2xs"
               >
-                How it works
+                See how it works →
               </Link>
             </div>
 
-            {/* Neutral Verification Indicators */}
-            <div className="pt-6 border-t border-[#E5E9F0] flex flex-wrap items-center gap-3 text-xs text-[#5B6B84]">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#E5E9F0] font-mono text-[11px] text-[#0F172A]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#00C48C]" />
-                Demo environment
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#E5E9F0] font-mono text-[11px] text-[#0F172A]">
-                Simulated payment events
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#E5E9F0] font-mono text-[11px] text-[#0F172A]">
-                Razorpay webhook ingestion
-              </span>
+            {/* Supporting Metadata */}
+            <div className="pt-6 border-t border-[#E5E9F0] flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-[#5B6B84] font-mono">
+              <span className="text-[#0F172A] font-semibold">Razorpay events</span>
+              <span>•</span>
+              <span className="text-[#0F172A] font-semibold">Policy-driven automation</span>
+              <span>•</span>
+              <span className="text-[#0F172A] font-semibold">Full audit trail</span>
             </div>
           </div>
 
           {/* Right Column: Realistic Recovery Console Mockup */}
           <div className="lg:col-span-6">
-            <div className="bg-white border border-[#E5E9F0] rounded-xl shadow-sm overflow-hidden text-xs">
+            <div className="bg-white border border-[#E5E9F0] rounded-xl shadow-xs overflow-hidden text-xs">
               {/* Window Titlebar */}
-              <div className="px-4 py-3 bg-[#F8F9FC] border-b border-[#E5E9F0] flex items-center justify-between">
+              <div className="px-4 py-2.5 bg-[#F8F9FC] border-b border-[#E5E9F0] flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#E5E9F0]" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#E5E9F0]" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#E5E9F0]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#E2E8F0]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#E2E8F0]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#E2E8F0]" />
                   </div>
-                  <span className="text-[11px] font-mono text-[#5B6B84] ml-2">
-                    console / opportunity / RP_8F42A1
+                  <span className="text-[11px] font-mono text-[#5B6B84] ml-2 font-medium">
+                    console / opportunity / #RP_8F42A1
                   </span>
                 </div>
                 <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-mono font-medium">
@@ -93,112 +92,129 @@ export function HeroSection() {
                 <div className="flex items-start justify-between pb-3 border-b border-[#E5E9F0]">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-sm text-[#0F172A]">RP_8F42A1</span>
+                      <span className="font-mono font-bold text-sm text-[#0F172A]">Payment #RP_8F42A1</span>
                       <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-red-50 text-red-700 border border-red-200">
                         FAILED
                       </span>
                     </div>
-                    <p className="text-[#5B6B84] text-[11px] mt-0.5 flex items-center gap-1">
+                    <p className="text-[#5B6B84] text-[11px] mt-1 flex items-center gap-1">
                       <AlertCircle className="w-3 h-3 text-red-500" />
-                      Reason: <span className="font-medium text-[#0F172A]">Card network decline</span>
+                      <span>Card network decline</span>
                     </p>
                   </div>
 
                   <div className="text-right">
-                    <div className="text-lg font-bold font-mono text-[#0F172A]">₹14,850.00</div>
-                    <span className="text-[10px] font-mono text-[#5B6B84]">INR · HDFC Gateway</span>
+                    <div className="text-xl font-bold font-mono text-[#0F172A]">₹14,850</div>
+                    <span className="text-[10px] font-mono text-[#5B6B84]">INR · HDFC Gateway Rail</span>
                   </div>
                 </div>
 
-                {/* Customer Context Card */}
-                <div className="p-3 bg-[#F8F9FC] border border-[#E5E9F0] rounded-lg space-y-1.5">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="font-semibold text-[#5B6B84] uppercase tracking-wider text-[10px] flex items-center gap-1">
-                      <User className="w-3 h-3 text-[#1E5EFF]" /> Customer Profile
-                    </span>
-                    <span className="text-[10px] font-mono font-semibold text-[#008760] bg-[#00C48C]/10 px-1.5 py-0.2 rounded">
+                {/* PAYMENT CONTEXT */}
+                <div className="p-3 bg-[#F8F9FC] border border-[#E5E9F0] rounded-lg space-y-2">
+                  <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#5B6B84] flex items-center justify-between">
+                    <span>PAYMENT CONTEXT</span>
+                    <span className="text-[#008760] font-semibold bg-[#00C48C]/10 px-1.5 py-0.2 rounded text-[9px]">
                       LOW RISK
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-[12px] font-medium text-[#0F172A]">
-                    <span>Rahul Mehta</span>
-                    <span className="text-[11px] font-mono text-[#5B6B84]">3 previous successful payments</span>
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div>
+                      <span className="text-[#5B6B84] block text-[10px]">Customer:</span>
+                      <span className="font-semibold text-[#0F172A]">Rahul Mehta</span>
+                    </div>
+                    <div>
+                      <span className="text-[#5B6B84] block text-[10px]">Risk Profile:</span>
+                      <span className="font-semibold text-[#008760]">Low</span>
+                    </div>
+                    <div>
+                      <span className="text-[#5B6B84] block text-[10px]">Previous successful:</span>
+                      <span className="font-mono font-semibold text-[#0F172A]">3 payments</span>
+                    </div>
+                    <div>
+                      <span className="text-[#5B6B84] block text-[10px]">Previous failures:</span>
+                      <span className="font-mono font-semibold text-[#5B6B84]">1 payment</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Recommendation Rail */}
+                {/* RECOVERY RECOMMENDATION */}
                 <div className="p-3 bg-blue-50/50 border border-blue-100 rounded-lg space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-blue-900 flex items-center gap-1.5 text-[11px]">
-                      <Zap className="w-3.5 h-3.5 text-[#1E5EFF]" /> Recommended Recovery Action
+                    <span className="text-[10px] font-mono font-bold text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <Zap className="w-3 h-3 text-[#1E5EFF]" /> RECOVERY RECOMMENDATION
                     </span>
                     <span className="font-mono text-[11px] font-bold text-[#1E5EFF]">
-                      88% Probability
+                      88% Recovery Probability
                     </span>
                   </div>
 
-                  <div className="text-[12px] text-[#0F172A]">
-                    Switch to <strong className="text-[#1E5EFF]">UPI payment link</strong> delivered via WhatsApp & SMS.
+                  <div className="text-[12px] text-[#0F172A] font-medium">
+                    Switch to UPI payment link
                   </div>
 
-                  <div className="flex items-center justify-between text-[11px] pt-1 text-[#5B6B84] font-mono border-t border-blue-100">
-                    <span>Expected Recovery Value:</span>
-                    <strong className="text-[#0F172A]">₹14,850</strong>
+                  <div className="flex items-center justify-between text-[11px] pt-1 text-[#5B6B84] font-mono border-t border-blue-100/80">
+                    <span>Expected recovered value:</span>
+                    <strong className="text-[#0F172A] font-bold">₹14,850</strong>
                   </div>
                 </div>
 
-                {/* Policy Guardrail Checks */}
-                <div className="space-y-1.5 pt-1">
-                  <div className="text-[10px] font-mono font-semibold text-[#5B6B84] uppercase tracking-wider">
-                    Deterministic Policy Checks
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 text-[11px]">
-                    <div className="p-2 bg-white border border-[#E5E9F0] rounded flex items-center gap-1.5 text-[#0F172A]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#00C48C] flex-shrink-0" />
-                      <span className="truncate">Amount limit</span>
-                    </div>
-                    <div className="p-2 bg-white border border-[#E5E9F0] rounded flex items-center gap-1.5 text-[#0F172A]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#00C48C] flex-shrink-0" />
-                      <span className="truncate">Retry limit</span>
-                    </div>
-                    <div className="p-2 bg-white border border-[#E5E9F0] rounded flex items-center gap-1.5 text-[#0F172A]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#00C48C] flex-shrink-0" />
-                      <span className="truncate">Customer risk</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between pt-1 text-[11px]">
-                    <span className="text-[#5B6B84]">Policy status:</span>
+                {/* POLICY */}
+                <div className="space-y-2 pt-0.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono font-bold text-[#5B6B84] uppercase tracking-wider">
+                      POLICY
+                    </span>
                     <span className="inline-flex items-center gap-1 font-mono font-bold text-[#008760] text-[10px] bg-[#00C48C]/10 px-2 py-0.5 rounded border border-[#00C48C]/20">
                       <ShieldCheck className="w-3 h-3" /> AUTO-ELIGIBLE
                     </span>
                   </div>
+
+                  <div className="grid grid-cols-3 gap-2 text-[11px]">
+                    <div className="p-2 bg-[#F8F9FC] border border-[#E5E9F0] rounded flex items-center justify-between">
+                      <span className="text-[#5B6B84]">Amount limit</span>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#00C48C]" />
+                    </div>
+                    <div className="p-2 bg-[#F8F9FC] border border-[#E5E9F0] rounded flex items-center justify-between">
+                      <span className="text-[#5B6B84]">Retry limit</span>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#00C48C]" />
+                    </div>
+                    <div className="p-2 bg-[#F8F9FC] border border-[#E5E9F0] rounded flex items-center justify-between">
+                      <span className="text-[#5B6B84]">Customer risk</span>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#00C48C]" />
+                    </div>
+                  </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="pt-2 flex items-center gap-2.5">
+                {/* Action Buttons & Audit Notice */}
+                <div className="pt-2 space-y-2">
                   {recoveredState ? (
-                    <div className="w-full py-2.5 px-3 bg-[#00C48C]/10 border border-[#00C48C]/30 rounded-lg text-center font-semibold text-[#008760] text-xs flex items-center justify-center gap-2 animate-in fade-in duration-200">
+                    <div className="w-full py-2.5 px-3 bg-[#00C48C]/10 border border-[#00C48C]/30 rounded-lg text-center font-semibold text-[#008760] text-xs flex items-center justify-center gap-2">
                       <CheckCircle2 className="w-4 h-4" />
-                      <span>Recovery Link Dispatched · UPI Intent Created</span>
+                      <span>Payment link generated · UPI intent dispatched</span>
                     </div>
                   ) : (
-                    <>
+                    <div className="flex items-center gap-2.5">
                       <button
                         onClick={() => setRecoveredState(true)}
-                        className="flex-1 py-2.5 px-4 rounded-lg bg-[#1E5EFF] hover:bg-[#1649D8] text-white font-semibold transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                        className="flex-1 py-2.5 px-4 rounded-lg bg-[#1E5EFF] hover:bg-[#1649D8] text-white font-semibold transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
                       >
                         <RotateCw className="w-3.5 h-3.5" />
                         <span>Recover payment</span>
                       </button>
                       <button
                         onClick={() => router.push("/opportunities?q=RP_8F42A1")}
-                        className="py-2.5 px-4 rounded-lg border border-[#E5E9F0] hover:bg-slate-50 text-[#0F172A] font-medium transition-colors cursor-pointer flex items-center gap-1"
+                        className="py-2.5 px-4 rounded-lg border border-[#E5E9F0] hover:bg-slate-50 text-[#0F172A] font-medium transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
                       >
                         <span>Review</span>
                         <ArrowUpRight className="w-3.5 h-3.5 text-[#5B6B84]" />
                       </button>
-                    </>
+                    </div>
                   )}
+
+                  <div className="text-center text-[10px] text-[#5B6B84] font-mono flex items-center justify-center gap-1">
+                    <FileCheck2 className="w-3 h-3 text-[#5B6B84]" />
+                    <span>Action will be logged to audit trail</span>
+                  </div>
                 </div>
               </div>
             </div>

@@ -63,17 +63,16 @@ export function ExecutiveOverviewSection() {
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header: Left-Aligned, Authoritative */}
         <div className="max-w-[560px] text-left space-y-2.5 mb-10 sm:mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#7B61FF]/10 border border-[#7B61FF]/20 text-[#7B61FF] text-xs font-semibold uppercase tracking-[0.08em]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#7B61FF]" />
-            <span>EXECUTIVE OVERVIEW</span>
-          </div>
+          <span className="text-xs font-mono font-semibold uppercase tracking-wider text-[#1E5EFF]">
+            04 · PRODUCT CONSOLE PREVIEW
+          </span>
 
-          <h2 className="text-3xl sm:text-4xl font-bold text-[#1A1A2E] tracking-tight leading-[1.12]">
-            One console. Every dollar of revenue risk, visible.
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#0F172A] tracking-tight leading-[1.15]">
+            Operational recovery telemetry in real time.
           </h2>
 
-          <p className="text-base text-[#5A5A72] leading-relaxed">
-            See recovered revenue, risk exposure, and agent performance in real time — the same view your finance team sees.
+          <p className="text-sm text-[#5B6B84] leading-relaxed">
+            Monitor recovered revenue, risk exposure, and policy execution in real time — the exact view your finance and operations teams rely on.
           </p>
         </div>
 
