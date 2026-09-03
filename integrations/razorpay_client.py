@@ -19,8 +19,8 @@ def create_payment_link(
     """
     Creates a Payment Link using Razorpay REST API.
     """
-    key_id = os.getenv("RAZORPAY_KEY_ID", "rzp_test_recoverflow")
-    key_secret = os.getenv("RAZORPAY_KEY_SECRET", "recoverflow_secret")
+    key_id = os.getenv("RAZORPAY_KEY_ID")
+    key_secret = os.getenv("RAZORPAY_KEY_SECRET")
     url = "https://api.razorpay.com/v1/payment_links"
 
     customer_data = {}

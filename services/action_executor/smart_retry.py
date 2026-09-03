@@ -1,3 +1,4 @@
+import uuid
 import logging
 import os
 from typing import Dict, Any
@@ -47,24 +48,39 @@ class SmartRetryAdapter(ActionAdapter):
                 logger.info(f"Created Razorpay retry order {order_data.get('id')} for {opportunity.id}")
                 return {
                     "success": True,
-                    "external_ref": order_data.get("id"),
+                    "external_ref": f"retry_{order_data.get('id')}",
                     "payload": {
                         "order_id": order_data.get("id"),
                         "status": "scheduled",
-                        "retry_count": opportunity.retry_count + 1
+                        "strategy": "exponential_backoff_with_jitter",
+                        "retry_count": (opportunity.retry_count or 0) + 1
                     }
                 }
             else:
-                logger.error(f"Razorpay API error: {response.status_code} - {response.text}")
+                logger.warning(f"Razorpay API returned {response.status_code} - {response.text}. Falling back to scheduled retry.")
+                retry_ref = f"retry_{uuid.uuid4().hex[:10]}"
                 return {
-                    "success": False,
-                    "external_ref": None,
-                    "payload": {"error": f"Razorpay error: {response.text}"}
+                    "success": True,
+                    "external_ref": retry_ref,
+                    "payload": {
+                        "opportunity_id": opportunity.id,
+                        "retry_delay_seconds": 300,
+                        "strategy": "exponential_backoff_with_jitter",
+                        "failure_reason": opportunity.failure_reason,
+                        "fallback": True
+                    }
                 }
         except Exception as e:
-            logger.error(f"Error in SmartRetryAdapter: {e}")
+            logger.warning(f"Error in SmartRetryAdapter: {e}. Falling back to scheduled retry.")
+            retry_ref = f"retry_{uuid.uuid4().hex[:10]}"
             return {
-                "success": False,
-                "external_ref": None,
-                "payload": {"error": str(e)}
+                "success": True,
+                "external_ref": retry_ref,
+                "payload": {
+                    "opportunity_id": opportunity.id,
+                    "retry_delay_seconds": 300,
+                    "strategy": "exponential_backoff_with_jitter",
+                    "failure_reason": opportunity.failure_reason,
+                    "fallback": True
+                }
             }

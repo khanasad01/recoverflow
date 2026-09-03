@@ -8,7 +8,7 @@ pydantic-settings
 celery
 redis
 razorpay
-google-generativeai
+google-genai
 langgraph
 pyyaml
 requests

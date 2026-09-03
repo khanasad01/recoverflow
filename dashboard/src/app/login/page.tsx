@@ -32,7 +32,16 @@ export default function LoginPage() {
   const router = useRouter();
 
   // State for form fields
-  const [email, setEmail] = useState<string>("");
+  const [email, setEmail] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        return sessionStorage.getItem("rf_login_draft_email") || "";
+      } catch {
+        return "";
+      }
+    }
+    return "";
+  });
   const [password, setPassword] = useState<string>("");
   const [emailError, setEmailError] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("");
@@ -43,21 +52,19 @@ export default function LoginPage() {
   const [step, setStep] = useState<OnboardingStep>("auth");
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
 
-  // State for auth status (replaces useSyncExternalStore)
-  const [isAuth, setIsAuth] = useState<boolean>(false);
-  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
-
-  // Initialize email from sessionStorage on mount
-  useEffect(() => {
+  // State for auth status
+  const [isAuth, setIsAuth] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
-      try {
-        const storedEmail = sessionStorage.getItem("rf_login_draft_email") || "";
-        setEmail(storedEmail);
-      } catch {
-        setEmail("");
-      }
+      return !!getToken();
     }
-  }, []);
+    return false;
+  });
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
+    if (typeof window !== "undefined") {
+      return getUser();
+    }
+    return null;
+  });
 
   // Save email to sessionStorage whenever it changes
   useEffect(() => {
@@ -69,18 +76,6 @@ export default function LoginPage() {
       }
     }
   }, [email]);
-
-  // Initialize auth state from localStorage on mount
-  useEffect(() => {
-    const token = getToken();
-    setIsAuth(!!token);
-
-    if (token) {
-      setCurrentUser(getUser());
-    } else {
-      setCurrentUser(null);
-    }
-  }, []);
 
   // Listen for storage events to keep auth state in sync
   useEffect(() => {

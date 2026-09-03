@@ -15,7 +15,7 @@ import random
 import yaml
 import logging
 
-from apps.api.middleware import RequestIDMiddleware
+from apps.api.middleware import RequestIDMiddleware, RateLimitMiddleware
 from apps.api.metrics import get_prometheus_metrics, webhook_events_total
 from services.streams.producer import publish_raw_event
 from apps.api.deps import (
@@ -101,8 +101,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Add Request ID middleware
+# Add Request ID and Rate Limiting middleware
 app.add_middleware(RequestIDMiddleware)
+app.add_middleware(RateLimitMiddleware)
 
 
 def seed_default_users():
@@ -148,16 +149,55 @@ def seed_default_users():
 
 
 # Environment validation function
+INSECURE_JWT_FALLBACK = "recoverflow_super_secret_jwt_key_987654321_secure_enterprise"
+
+
 def validate_env():
+    """
+    Fail-fast startup check:
+    1. Critical security and infrastructure variables must be present and non-default.
+    2. Degraded feature warnings for optional third-party integrations.
+    """
+    # 1. Critical Fail-Fast Check: JWT_SECRET_KEY
+    jwt_secret = os.getenv("JWT_SECRET_KEY")
+    if not jwt_secret:
+        raise RuntimeError("FATAL: JWT_SECRET_KEY is missing. A secure, unique JWT secret is required.")
+    if jwt_secret == INSECURE_JWT_FALLBACK:
+        raise RuntimeError(
+            "FATAL: JWT_SECRET_KEY matches the insecure hardcoded fallback string. "
+            "Set a distinct, secure JWT_SECRET_KEY in your environment."
+        )
+
+    # Core required infrastructure variables
     required = [
+        "DATABASE_URL",
         "RAZORPAY_KEY_ID",
         "RAZORPAY_KEY_SECRET",
         "RAZORPAY_WEBHOOK_SECRET",
-        "DATABASE_URL"
     ]
     missing = [var for var in required if not os.getenv(var)]
     if missing:
-        logger.warning(f"Missing environment variables: {', '.join(missing)}")
+        raise RuntimeError(f"FATAL: Missing required environment variables: {', '.join(missing)}")
+
+    # 2. Non-fatal warnings for degraded integrations
+    redis_url = os.getenv("REDIS_URL")
+    if not redis_url or "localhost" in redis_url:
+        logger.warning("WARNING: using local Redis fallback, Celery workers may not connect in multi-host deployment")
+
+    if not os.getenv("SENDGRID_API_KEY"):
+        logger.warning("WARNING: email notifications disabled, SendGrid key not set")
+
+    if not os.getenv("TWILIO_ACCOUNT_SID") or not os.getenv("TWILIO_AUTH_TOKEN"):
+        logger.warning("WARNING: WhatsApp notifications disabled, Twilio credentials not set")
+
+    if not os.getenv("GEMINI_API_KEY") and not os.getenv("GOOGLE_API_KEY"):
+        logger.warning("WARNING: AI diagnosis disabled, falling back to rule-based scoring")
+
+    scoring_mode = os.getenv("SCORING_MODEL", "heuristic").lower().strip()
+    if scoring_mode != "ml":
+        logger.warning("WARNING: running in heuristic scoring mode, not ML mode")
+
+    logger.info("Environment configuration validated successfully.")
 
 
 def ensure_dynamic_schema_columns():
@@ -1178,7 +1218,7 @@ def update_policy(
 @app.get("/api/v1/settings", response_model=SettingsResponse)
 def get_settings(current_user: User = Depends(get_current_active_user)):
     """Get environment and integration configuration details (Requires Auth)."""
-    key_id = os.getenv("RAZORPAY_KEY_ID", "rzp_test_sample123")
+    key_id = os.getenv("RAZORPAY_KEY_ID", "")
     masked_key = f"{key_id[:8]}...{key_id[-4:]}" if len(key_id) > 12 else "rzp_test_****"
 
     return {

@@ -288,7 +288,7 @@ function handleAuthUnauthorized(): void {
     localStorage.removeItem(AUTH_TOKEN_KEY);
     localStorage.removeItem(AUTH_USER_KEY);
     if (window.location.pathname !== "/login") {
-      window.location.href = "/login";
+      window.location.href = new URL("/login", window.location.origin).toString();
     }
   }
 }

@@ -118,20 +118,23 @@ def diagnose_node(state: RecoveryState) -> RecoveryState:
     api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
 
     if api_key:
+        model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        prompt = (
+            f"Analyze this failed payment in 2 sentences. "
+            f"Failure reason: {reason}, Amount: INR {amount}, Recoverability Score: {score:.2f}. "
+            f"Customer Profile: {state.get('customer_profile')}."
+        )
         try:
-            import google.generativeai as genai
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("gemini-3.6-flash")
-            prompt = (
-                f"Analyze this failed payment in 2 sentences. "
-                f"Failure reason: {reason}, Amount: INR {amount}, Recoverability Score: {score:.2f}. "
-                f"Customer Profile: {state.get('customer_profile')}."
+            from google import genai
+            client = genai.Client(api_key=api_key)
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt
             )
-            response = model.generate_content(prompt)
             if response and response.text:
                 diagnosis = response.text.strip()
         except Exception as e:
-            logger.warning(f"Gemini diagnosis error: {e}, falling back to rules")
+            logger.warning(f"Google GenAI ({model_name}) diagnosis error: {e}, falling back to deterministic rules")
 
     if not diagnosis:
         diagnosis = fallback_diagnose(reason, amount, score)

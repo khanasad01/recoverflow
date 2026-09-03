@@ -17,19 +17,22 @@ class IncentiveAdapter(ActionAdapter):
         db: Session
     ) -> Dict[str, Any]:
         try:
-            # Real incentive logic - apply 10% discount as recovery incentive
             discount_amount = float(opportunity.amount_at_risk) * 0.10
-            incentive_code = f"RECOVER{opportunity.id[-6:].upper()}"
+            coupon_code = f"DISC_RECOVER_{opportunity.id[-6:].upper()}"
             
-            logger.info(f"Applied incentive {incentive_code} (10% discount = ₹{discount_amount}) for {opportunity.id}")
+            logger.info(f"Applied incentive {coupon_code} (10% discount = ₹{discount_amount}) for {opportunity.id}")
             
             return {
                 "success": True,
-                "external_ref": incentive_code,
+                "external_ref": coupon_code,
                 "payload": {
-                    "incentive_code": incentive_code,
+                    "coupon_code": coupon_code,
+                    "incentive_code": coupon_code,
+                    "discount_percentage": 10,
                     "discount_percent": 10,
                     "discount_amount": discount_amount,
+                    "validity_hours": 24,
+                    "amount_at_risk": float(opportunity.amount_at_risk or 0.0),
                     "status": "applied"
                 }
             }

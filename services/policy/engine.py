@@ -30,7 +30,7 @@ class PolicyEngine:
                 "payment_link": {
                     "max_amount": 10000,
                     "allowed_failure_reasons": ["insufficient_funds", "card_declined", "payment_failed", "bad_request_error"],
-                    "max_attempts": 10
+                    "max_attempts": 3
                 },
                 "whatsapp": {
                     "max_amount": 50000,
