@@ -113,7 +113,7 @@ export default function OverviewPage() {
           <div>
             <div className="flex items-center gap-3">
               <h2 className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight">
-                Executive Recovery Command Center
+                Overview
               </h2>
               {/* Real Live Indicator vs. Last Updated fallback */}
               {isConnected ? (
@@ -129,7 +129,7 @@ export default function OverviewPage() {
               )}
             </div>
             <p className="text-xs text-[#5B6B84] mt-1">
-              Autonomous payment failure recovery, multi-agent AI orchestration, and incremental revenue attribution.
+              Payment recovery pipeline status and metrics.
             </p>
           </div>
 
@@ -461,7 +461,7 @@ export default function OverviewPage() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-semibold text-[#0F172A]">Recent Autonomous Interventions</h3>
-              <p className="text-xs text-[#5B6B84] mt-0.5">Last 5 actions executed by LangGraph recovery agents</p>
+              <p className="text-xs text-[#5B6B84] mt-0.5">Last 5 recovery actions taken</p>
             </div>
             <Link
               href="/interventions"

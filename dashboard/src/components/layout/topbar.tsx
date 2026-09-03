@@ -18,13 +18,13 @@ import { useShell } from "./shell-context";
 import { toast } from "sonner";
 
 const ROUTE_TITLES: Record<string, { title: string; breadcrumb: string }> = {
-  "/overview": { title: "Executive Command Center", breadcrumb: "Console / Overview" },
-  "/opportunities": { title: "Failure Opportunities", breadcrumb: "Console / Opportunities" },
-  "/customers": { title: "Customer 360", breadcrumb: "Console / Customers" },
-  "/interventions": { title: "Recovery Interventions", breadcrumb: "Audit / Interventions" },
-  "/experiments": { title: "A/B Experiments & Lift", breadcrumb: "Growth / Experiments" },
-  "/policy": { title: "Policy Guardrails Editor", breadcrumb: "Rules / Policy Engine" },
-  "/settings": { title: "API & Integration Settings", breadcrumb: "System / Settings" },
+  "/overview": { title: "Overview", breadcrumb: "Dashboard / Overview" },
+  "/opportunities": { title: "Opportunities", breadcrumb: "Recovery / Opportunities" },
+  "/customers": { title: "Customers", breadcrumb: "Directory / Customers" },
+  "/interventions": { title: "Interventions", breadcrumb: "Audit / Interventions" },
+  "/experiments": { title: "Experiments", breadcrumb: "Analytics / Experiments" },
+  "/policy": { title: "Policy", breadcrumb: "Engine / Policy" },
+  "/settings": { title: "Settings", breadcrumb: "Workspace / Settings" },
 };
 
 function subscribeAuth(callback: () => void) {

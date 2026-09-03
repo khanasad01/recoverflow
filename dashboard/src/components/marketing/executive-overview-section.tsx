@@ -372,21 +372,21 @@ export function ExecutiveOverviewSection() {
           </div>
         </div>
 
-        {/* 5. Below the Console: 3 Understated Trust Badges */}
+        {/* 5. Below the Console: Architecture Highlights */}
         <div className="mt-8 flex items-center justify-center flex-wrap gap-6 sm:gap-10 text-xs font-medium text-[#5A5A72]">
-          <div className="flex items-center gap-2 grayscale hover:grayscale-0 transition-all opacity-80">
+          <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-[#00C48C]" />
-            <span>SOC 2 Type II Certified</span>
+            <span>Simulated Payment Events</span>
           </div>
 
-          <div className="flex items-center gap-2 grayscale hover:grayscale-0 transition-all opacity-80">
+          <div className="flex items-center gap-2">
             <BadgeCheck className="w-4 h-4 text-[#1E5EFF]" />
-            <span>Razorpay Verified Partner</span>
+            <span>Deterministic Policy Ceilings</span>
           </div>
 
-          <div className="flex items-center gap-2 grayscale hover:grayscale-0 transition-all opacity-80">
+          <div className="flex items-center gap-2">
             <Lock className="w-4 h-4 text-[#7B61FF]" />
-            <span>Bank-Grade 256-Bit TLS Encryption</span>
+            <span>HMAC SHA-256 Webhook Verification</span>
           </div>
         </div>
       </div>

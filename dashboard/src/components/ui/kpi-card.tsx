@@ -22,7 +22,7 @@ export function KpiCard({
 }: KpiCardProps) {
   return (
     <div
-      className={`bg-white border border-[#E5E9F0] rounded-xl p-5 shadow-[0_20px_40px_rgba(10,37,64,0.06)] hover:shadow-[0_24px_48px_rgba(10,37,64,0.10)] transition-all duration-200 flex flex-col justify-between ${className}`}
+      className={`bg-white border border-[#E5E9F0] rounded-xl p-5 shadow-xs hover:shadow-sm transition-all duration-200 flex flex-col justify-between ${className}`}
     >
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs font-semibold text-[#5B6B84] uppercase tracking-wider">

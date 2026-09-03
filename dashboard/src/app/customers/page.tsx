@@ -38,10 +38,10 @@ export default function CustomersPage() {
       <div className="space-y-6">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight">
-            Customer 360 Profiles
+            Customers
           </h2>
           <p className="text-xs text-[#5B6B84] mt-1">
-            Aggregated customer risk profiles, historical payment recovery rates, and lifetime value telemetry.
+            Customer risk profiles, recovery rates, and historical payment activity.
           </p>
         </div>
 

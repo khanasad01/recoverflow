@@ -112,10 +112,10 @@ export default function SettingsPage() {
       <div className="space-y-6 max-w-5xl">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight">
-            System &amp; Integration Settings
+            Settings
           </h2>
           <p className="text-xs text-[#5B6B84] mt-1">
-            Payment gateway webhook endpoints, masked credentials, environment topology, and team permissions.
+            Gateway webhooks, credentials, environment configuration, and team permissions.
           </p>
         </div>
 

@@ -42,7 +42,7 @@ export function FeatureDeepDives() {
                   <CheckCircle2 className="w-3.5 h-3.5" />
                 </div>
                 <div className="text-sm text-[#0F172A]">
-                  <strong className="text-[#0A2540]">Network Card Tokenization:</strong> Fully compliant with RBI tokenization mandates, safeguarding card details while accelerating repeat checkout.
+                  <strong className="text-[#0A2540]">Network Card Tokenization:</strong> Cryptographically tokenized card storage safeguarding card details while accelerating repeat checkout.
                 </div>
               </div>
 
@@ -131,7 +131,7 @@ export function FeatureDeepDives() {
                     <span>Pay ₹2,499.00 Securely</span>
                   </button>
                   <p className="text-[11px] text-center text-[#5B6B84] mt-2">
-                    Protected by RecoverFlow Smart Shield & RBI Token Vault
+                    Protected by RecoverFlow Smart Shield & Token Vault
                   </p>
                 </div>
               </div>

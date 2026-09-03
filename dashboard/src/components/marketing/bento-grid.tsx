@@ -41,7 +41,7 @@ export function BentoGrid() {
                   Unified Payment Gateway & Checkout Suite
                 </h3>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#00C48C]/10 text-[#00C48C]">
-                  99.995% SLA
+                  Sub-second Recovery
                 </span>
               </div>
               <p className="text-sm text-[#5B6B84] leading-relaxed max-w-lg">
@@ -72,7 +72,7 @@ export function BentoGrid() {
               <div className="pt-2 flex items-center justify-between text-[11px] text-[#5B6B84]">
                 <span>Average authorization latency: <strong className="text-[#0A2540]">142ms</strong></span>
                 <span className="text-[#00C48C] font-semibold flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> RBI Compliant
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Tokenized Security
                 </span>
               </div>
             </div>

@@ -119,10 +119,10 @@ export default function PolicyPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight">
-              Deterministic Policy Guardrails
+              Policy
             </h2>
             <p className="text-xs text-[#5B6B84] mt-1">
-              Safety ceilings, maximum retry counts, and mandatory human escalation thresholds compiled ahead of agent execution.
+              Safety ceilings, retry limits, and human escalation thresholds.
             </p>
           </div>
 

@@ -27,8 +27,8 @@ const NAVIGATION_ITEMS = [
   { name: "Customers", href: "/customers", icon: Users },
   { name: "Interventions", href: "/interventions", icon: Zap },
   { name: "Experiments", href: "/experiments", icon: FlaskConical },
-  { name: "Policy Editor", href: "/policy", icon: FileCode2 },
-  { name: "Settings & API", href: "/settings", icon: Settings },
+  { name: "Policy", href: "/policy", icon: FileCode2 },
+  { name: "Settings", href: "/settings", icon: Settings },
 ];
 
 export function Sidebar() {

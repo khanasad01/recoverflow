@@ -89,10 +89,10 @@ export default function ExperimentsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight">
-              A/B Testing &amp; Incremental Lift Verification
+              Experiments
             </h2>
             <p className="text-xs text-[#5B6B84] mt-1">
-              Rigorous randomized control trials (RCT) isolating RecoverFlow AI impact from natural organic recovery.
+              Randomized control trials measuring incremental recovery lift over baseline.
             </p>
           </div>
 

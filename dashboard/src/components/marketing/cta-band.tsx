@@ -20,29 +20,29 @@ export function CtaBand() {
             </div>
 
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight">
-              Ready to power your business with Razorpay-grade infrastructure?
+              Ready to recover failed payments for your Razorpay business?
             </h2>
 
             <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              Integrate in minutes, eliminate checkout friction, and let autonomous intelligence recover lost revenue 24 hours a day.
+              Integrate in minutes, detect payment declines in real time, and let intelligent workflows recover lost revenue within policy guardrails.
             </p>
 
             {/* CTA Buttons */}
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/login"
-                className="btn-pill-primary px-8 py-4 text-base font-semibold w-full sm:w-auto inline-flex items-center justify-center gap-2 shadow-fintech-pill"
+                className="btn-pill-primary px-8 py-4 text-base font-semibold w-full sm:w-auto inline-flex items-center justify-center gap-2 shadow-sm"
               >
                 <span>Get Started Free</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
 
-              <a
+              <Link
                 href="#developer"
-                className="btn-pill-ghost-light px-8 py-4 text-base font-semibold w-full sm:w-auto text-center"
+                className="px-8 py-4 text-base font-semibold w-full sm:w-auto text-center text-white border border-white/20 hover:bg-white/10 rounded-full transition-colors"
               >
                 Explore Sandbox APIs
-              </a>
+              </Link>
             </div>
 
             {/* Trust guarantees strip */}
