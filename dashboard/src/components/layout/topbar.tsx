@@ -18,13 +18,13 @@ import { useShell } from "./shell-context";
 import { toast } from "sonner";
 
 const ROUTE_TITLES: Record<string, { title: string; breadcrumb: string }> = {
-  "/overview": { title: "Recovery Overview", breadcrumb: "Console / Overview" },
-  "/opportunities": { title: "Recovery Queue", breadcrumb: "Recovery / Queue" },
+  "/overview": { title: "Recovery Overview", breadcrumb: "Operations / Recovery Overview" },
+  "/opportunities": { title: "Recovery Queue", breadcrumb: "Operations / Recovery Queue" },
+  "/interventions": { title: "Recent Autonomous Interventions", breadcrumb: "Autonomous / Interventions" },
   "/customers": { title: "Customers", breadcrumb: "Intelligence / Customers" },
-  "/interventions": { title: "Activity Ledger", breadcrumb: "Audit / Activity" },
-  "/experiments": { title: "Analytics & Lift", breadcrumb: "Analytics / Experiments" },
-  "/policy": { title: "Recovery Rules", breadcrumb: "Rules / Engine" },
-  "/settings": { title: "Integrations & Setup", breadcrumb: "Workspace / Settings" },
+  "/experiments": { title: "Analytics & Lift", breadcrumb: "Revenue / Analytics & Lift" },
+  "/policy": { title: "Rules & Workflows", breadcrumb: "Automation / Rules & Workflows" },
+  "/settings": { title: "Settings & Integrations", breadcrumb: "Platform / Settings & Integrations" },
 };
 
 function subscribeAuth(callback: () => void) {
@@ -57,27 +57,27 @@ export function Topbar() {
   }, []);
 
   const routeInfo = ROUTE_TITLES[pathname] || {
-    title: "Executive Command Center",
-    breadcrumb: "Console / Overview",
+    title: "Recovery Overview",
+    breadcrumb: "Operations / Recovery Overview",
   };
 
   return (
-    <header className="h-16 sticky top-0 z-20 bg-white/85 backdrop-blur-md border-b border-[#E5E9F0] px-4 sm:px-6 flex items-center justify-between select-none">
+    <header className="h-16 sticky top-0 z-20 bg-white border-b border-[#E5E9F0] px-4 sm:px-6 flex items-center justify-between select-none shadow-2xs">
       {/* Left: Mobile hamburger + Page Title & Breadcrumb */}
       <div className="flex items-center gap-3 min-w-0">
         <button
           onClick={() => setIsMobileDrawerOpen(!isMobileDrawerOpen)}
-          className="lg:hidden p-2 rounded-lg text-[#0F172A] hover:bg-[#F1F4F9] transition-colors"
+          className="lg:hidden p-2 rounded-md text-[#0F172A] hover:bg-[#F1F4F9] transition-colors"
           aria-label="Toggle navigation drawer"
         >
           <Menu className="w-5 h-5 stroke-[1.5]" />
         </button>
 
         <div className="flex flex-col min-w-0">
-          <div className="text-[11px] font-mono font-medium text-[#5B6B84] truncate leading-none mb-1">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-[#5B6B84] truncate leading-none mb-1">
             {routeInfo.breadcrumb}
           </div>
-          <h1 className="text-base sm:text-lg font-semibold text-[#0F172A] truncate leading-tight tracking-tight">
+          <h1 className="text-base sm:text-lg font-bold text-[#0F172A] truncate leading-tight tracking-tight">
             {routeInfo.title}
           </h1>
         </div>
@@ -85,21 +85,21 @@ export function Topbar() {
 
       {/* Center-Right: Search + Environment + Notifications + Avatar */}
       <div className="flex items-center gap-3 sm:gap-4">
-        {/* Search Input (Expands from 200px to 320px on focus) */}
+        {/* Search Input */}
         <div className="relative hidden md:block">
-          <Search className="w-4 h-4 text-[#5B6B84] absolute left-3 top-1/2 -translate-y-1/2 stroke-[1.5]" />
+          <Search className="w-3.5 h-3.5 text-[#5B6B84] absolute left-3 top-1/2 -translate-y-1/2 stroke-[1.75]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
-            placeholder="Search opportunities..."
-            className={`h-9 pl-9 pr-12 rounded-lg bg-white border border-[#E5E9F0] text-xs text-[#0F172A] placeholder-[#5B6B84] transition-all duration-200 outline-none focus:border-[#1E5EFF] focus:ring-2 focus:ring-[#1E5EFF]/15 ${
-              searchFocused ? "w-80" : "w-52"
+            placeholder="Search transactions, customers, opportunities..."
+            className={`h-8.5 pl-8.5 pr-12 rounded-md bg-[#F8F9FC] border border-[#E5E9F0] text-xs text-[#0F172A] placeholder-[#94A3B8] transition-all duration-150 outline-none focus:bg-white focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 ${
+              searchFocused ? "w-80" : "w-64"
             }`}
           />
-          <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-mono font-bold text-[#5B6B84] bg-[#F1F4F9] border border-[#E5E9F0] rounded">
+          <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[9px] font-mono font-bold text-[#5B6B84] bg-white border border-[#E5E9F0] rounded">
             ⌘K
           </kbd>
         </div>

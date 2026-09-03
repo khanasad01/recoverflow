@@ -22,13 +22,13 @@ import { clsx } from "clsx";
 import { useShell } from "./shell-context";
 
 const NAVIGATION_ITEMS = [
-  { name: "Recovery Overview", href: "/overview", icon: LayoutDashboard },
+  { name: "Overview", href: "/overview", icon: LayoutDashboard },
   { name: "Recovery Queue", href: "/opportunities", icon: AlertTriangle },
-  { name: "Recovery Rules", href: "/policy", icon: FileCode2 },
+  { name: "Interventions", href: "/interventions", icon: Zap },
   { name: "Customers", href: "/customers", icon: Users },
   { name: "Analytics & Lift", href: "/experiments", icon: FlaskConical },
-  { name: "Activity Ledger", href: "/interventions", icon: Zap },
-  { name: "Integrations & Setup", href: "/settings", icon: Settings },
+  { name: "Rules & Workflows", href: "/policy", icon: FileCode2 },
+  { name: "Settings & Integrations", href: "/settings", icon: Settings },
 ];
 
 export function Sidebar() {
@@ -47,43 +47,60 @@ export function Sidebar() {
       <aside
         className={clsx(
           "bg-[#0A2540] text-white flex flex-col flex-shrink-0 transition-all duration-200 select-none border-r border-[#1D3152] z-30",
-          isCollapsed ? "w-[72px]" : "w-[240px]"
+          isCollapsed ? "w-[72px]" : "w-[248px]"
         )}
       >
-        {/* 64px Header Zone with Clickable Brand Mark */}
+        {/* Brand Header Zone */}
         <div className="h-16 flex items-center px-4 border-b border-[#1D3152] flex-shrink-0">
           <button
             onClick={() => setShowLeaveModal(true)}
             title="Click to return to Public Homepage"
             className="flex items-center gap-3 overflow-hidden text-left cursor-pointer group w-full"
           >
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#1E5EFF] via-[#3395FF] to-[#635BFF] p-[1px] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-              <div className="w-full h-full bg-[#0A2540] rounded-[11px] flex items-center justify-center">
-                <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M5 4C5 3.44772 5.44772 3 6 3H14C17.3137 3 20 5.68629 20 9C20 11.8344 18.0326 14.2096 15.3676 14.8396L19.4142 20.4206C19.8273 21.0028 19.3905 21.8 18.6657 21.8H14.8C14.3644 21.8 13.9592 21.5647 13.7431 21.1848L9.5 13.5H8V21C8 21.5523 7.55228 22 7 22H5.5C4.94772 22 4.5 21.5523 4.5 21V4H5ZM8 6.5V11H13.5C14.8807 11 16 9.88071 16 8.5C16 7.11929 14.8807 6.5 13.5 6.5H8Z" />
-                  <circle cx="17" cy="5.5" r="2" fill="#00D4FF" />
-                </svg>
-              </div>
+            {/* Geometric Razorpay Rail Mark */}
+            <div className="w-8 h-8 rounded-md bg-[#0B1B33] border border-white/15 p-1 flex items-center justify-center flex-shrink-0 relative overflow-hidden group-hover:scale-105 transition-transform">
+              <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
+                <path d="M13.5 2L4 13.5H11L9.5 22L20 9.5H13L13.5 2Z" fill="#E11D48" />
+                <path d="M3 5C5.5 3 8.5 2 12 2C17.5 2 22 6.5 22 12" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" strokeDasharray="2 3" />
+              </svg>
             </div>
             {!isCollapsed && (
               <div className="flex flex-col min-w-0 flex-1">
                 <span className="text-sm font-bold tracking-tight text-white flex items-center justify-between gap-1 truncate">
-                  <span>Recover<span className="text-[#3395FF]">Flow</span></span>
+                  <span>Recover<span className="text-[#E11D48]">Flow</span></span>
                   <ExternalLink className="w-3 h-3 text-white/40 group-hover:text-white/80 transition-colors" />
                 </span>
-                <span className="text-[10px] font-mono text-white/50 tracking-wider uppercase">
-                  Enterprise
-                </span>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <span className="text-[9px] font-sans text-white/50 tracking-wide">by</span>
+                  <span className="text-[9px] font-bold text-[#E11D48] tracking-wider uppercase">Razorpay</span>
+                </div>
               </div>
             )}
           </button>
         </div>
 
+        {/* Merchant Workspace Selector */}
+        {!isCollapsed ? (
+          <div className="px-3 pt-3 pb-1">
+            <div className="bg-[#0B1B33] border border-[#1D3152] rounded-md px-2.5 py-2 flex items-center justify-between">
+              <div className="min-w-0">
+                <div className="text-[11px] font-semibold text-white truncate">Acme Technologies</div>
+                <div className="text-[9px] font-mono text-[#94A3B8] truncate">MID: #rzp_live_89104</div>
+              </div>
+              <span className="w-2 h-2 rounded-full bg-[#00C48C] animate-pulse flex-shrink-0 ml-2" title="Razorpay Webhook Stream: Active" />
+            </div>
+          </div>
+        ) : (
+          <div className="py-2 flex justify-center">
+            <span className="w-2 h-2 rounded-full bg-[#00C48C] animate-pulse" title="Connected: rzp_live_89104" />
+          </div>
+        )}
+
         {/* Navigation List */}
-        <div className="px-2 py-4 flex-1 space-y-1 overflow-y-auto">
+        <div className="px-2 py-3 flex-1 space-y-0.5 overflow-y-auto">
           {!isCollapsed && (
-            <div className="px-3 pb-2 text-[10px] font-mono font-semibold uppercase tracking-wider text-white/40">
-              Recovery Console
+            <div className="px-3 pb-1.5 text-[9px] font-mono font-semibold uppercase tracking-wider text-white/40">
+              Recovery Operations
             </div>
           )}
           {NAVIGATION_ITEMS.map((item) => {
@@ -96,28 +113,28 @@ export function Sidebar() {
                 href={item.href}
                 title={isCollapsed ? item.name : undefined}
                 className={clsx(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-all relative group",
+                  "flex items-center gap-3 px-3 py-2 rounded-md text-xs font-medium transition-all relative group",
                   isActive
-                    ? "bg-white/[0.06] text-white font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:bg-[#1E5EFF] before:rounded-r"
-                    : "text-white/60 hover:bg-white/[0.03] hover:text-white/85"
+                    ? "bg-white/[0.08] text-white font-semibold before:absolute before:left-0 before:top-1 before:bottom-1 before:w-[3px] before:bg-[#E11D48] before:rounded-r"
+                    : "text-white/65 hover:bg-white/[0.04] hover:text-white"
                 )}
               >
-                <Icon className="w-5 h-5 flex-shrink-0 stroke-[1.5]" />
+                <Icon className="w-4 h-4 flex-shrink-0 stroke-[1.75]" />
                 {!isCollapsed && <span className="truncate">{item.name}</span>}
               </Link>
             );
           })}
         </div>
 
-        {/* Bottom Pinned Zone: Environment, Public Website, & Collapse Toggle */}
+        {/* Bottom Pinned Zone: Environment, Status, Collapse Toggle */}
         <div className="p-3 border-t border-[#1D3152] bg-[#0B1B33] space-y-2">
           {/* Public Website Quick Link */}
           <button
             onClick={() => setShowLeaveModal(true)}
             title="Return to Public Marketing Website"
-            className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/[0.05] text-white/70 hover:text-white transition-colors cursor-pointer text-xs text-left"
+            className="w-full flex items-center gap-2.5 p-1.5 rounded hover:bg-white/[0.05] text-white/70 hover:text-white transition-colors cursor-pointer text-xs text-left"
           >
-            <Globe className="w-4 h-4 flex-shrink-0 text-[#3395FF]" />
+            <Globe className="w-3.5 h-3.5 flex-shrink-0 text-[#38BDF8]" />
             {!isCollapsed && (
               <div className="flex-1 flex items-center justify-between min-w-0">
                 <span className="text-[11px] font-medium text-white/80">Public Website</span>
@@ -131,7 +148,7 @@ export function Sidebar() {
             onClick={toggleEnvironment}
             title="Click to switch environment"
             className={clsx(
-              "w-full flex items-center gap-2 p-2 rounded-lg border text-xs font-mono transition-colors text-left",
+              "w-full flex items-center gap-2 p-1.5 rounded border text-xs font-mono transition-colors text-left",
               environment === "live"
                 ? "bg-[#00C48C]/10 border-[#00C48C]/30 text-[#00C48C] hover:bg-[#00C48C]/15"
                 : "bg-[#F59E0B]/10 border-[#F59E0B]/30 text-[#F59E0B] hover:bg-[#F59E0B]/15"
@@ -139,14 +156,14 @@ export function Sidebar() {
           >
             <span
               className={clsx(
-                "w-2 h-2 rounded-full flex-shrink-0",
+                "w-1.5 h-1.5 rounded-full flex-shrink-0",
                 environment === "live" ? "bg-[#00C48C] animate-pulse" : "bg-[#F59E0B]"
               )}
             />
             {!isCollapsed && (
               <div className="flex-1 flex items-center justify-between min-w-0">
-                <span className="font-bold uppercase tracking-wider text-[10px]">
-                  {environment === "live" ? "Live Production" : "Test Sandbox"}
+                <span className="font-bold uppercase tracking-wider text-[9px]">
+                  {environment === "live" ? "Razorpay Live" : "Sandbox Test"}
                 </span>
                 <span className="text-[9px] text-white/50 underline">Switch</span>
               </div>
@@ -157,14 +174,14 @@ export function Sidebar() {
           <button
             onClick={toggleCollapsed}
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="w-full hidden lg:flex items-center justify-center p-2 rounded-lg hover:bg-white/[0.04] text-white/60 hover:text-white transition-colors cursor-pointer text-xs"
+            className="w-full hidden lg:flex items-center justify-center p-1.5 rounded hover:bg-white/[0.04] text-white/60 hover:text-white transition-colors cursor-pointer text-xs"
           >
             {isCollapsed ? (
               <PanelLeftOpen className="w-4 h-4" />
             ) : (
               <div className="flex items-center gap-2 w-full px-1">
-                <PanelLeftClose className="w-4 h-4 flex-shrink-0" />
-                <span className="text-[11px] text-white/50">Collapse menu</span>
+                <PanelLeftClose className="w-3.5 h-3.5 flex-shrink-0" />
+                <span className="text-[10px] text-white/50">Collapse sidebar</span>
               </div>
             )}
           </button>

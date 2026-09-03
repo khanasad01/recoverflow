@@ -53,9 +53,15 @@ export default function InterventionsPage() {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight">
-              Interventions
-            </h2>
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight">
+                Recent Autonomous Interventions
+              </h2>
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#00C48C]/10 text-[#008760] font-mono text-[10px] font-bold tracking-wider uppercase border border-[#00C48C]/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#00C48C] animate-pulse" />
+                Live Dispatch
+              </span>
+            </div>
             <p className="text-xs text-[#5B6B84] mt-1">
               Audit ledger of automated retries, payment link deliveries, and manual overrides.
             </p>
@@ -63,17 +69,17 @@ export default function InterventionsPage() {
         </div>
 
         {/* Action Filter Bar */}
-        <div className="bg-white border border-[#E5E9F0] rounded-xl p-4 shadow-sm space-y-3">
+        <div className="bg-white border border-[#E5E9F0] rounded-lg p-3.5 shadow-2xs space-y-3">
           <div className="flex flex-col sm:flex-row items-center gap-3">
             {/* Search */}
             <div className="relative flex-1 w-full">
-              <Search className="w-4 h-4 text-[#5B6B84] absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-[#5B6B84] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search intervention ID or opportunity ID..."
-                className="w-full h-9 pl-9 pr-3 text-xs bg-white border border-[#E5E9F0] rounded-lg text-[#0F172A] placeholder-[#5B6B84] focus:outline-none focus:border-[#1E5EFF]"
+                className="w-full h-8.5 pl-8.5 pr-3 text-xs bg-[#F8F9FC] border border-[#E5E9F0] rounded-md text-[#0F172A] placeholder-[#94A3B8] focus:bg-white focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15"
               />
             </div>
 
@@ -84,15 +90,14 @@ export default function InterventionsPage() {
                 { id: "smart_retry", label: "Smart Retry" },
                 { id: "payment_link", label: "Payment Link" },
                 { id: "incentive", label: "Incentive" },
-                { id: "email_reminder", label: "Email" },
-                { id: "subscription_recovery", label: "Sub Retry" },
+                { id: "human_review", label: "Human Review" },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActionFilter(tab.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
+                  className={`px-2.5 py-1 rounded text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                     actionFilter === tab.id
-                      ? "bg-[#1E5EFF] text-white"
+                      ? "bg-[#0A2540] text-white"
                       : "bg-[#F8F9FC] text-[#5B6B84] hover:text-[#0F172A] border border-[#E5E9F0]"
                   }`}
                 >

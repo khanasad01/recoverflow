@@ -300,7 +300,7 @@ export function OpportunityDrawer({
                 <button
                   onClick={() => onAction("payment_link")}
                   disabled={actionLoading}
-                  className="py-2.5 px-4 rounded-lg bg-[#1E5EFF] hover:bg-[#1649D8] text-white font-semibold transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                  className="py-2.5 px-4 rounded-md bg-[#E11D48] hover:bg-[#BE123C] text-white font-semibold transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
                 >
                   <RotateCw className={`w-3.5 h-3.5 ${actionLoading ? "animate-spin" : ""}`} />
                   <span>Recover payment</span>
@@ -308,7 +308,7 @@ export function OpportunityDrawer({
 
                 <button
                   onClick={() => setManualViewOpen(!manualViewOpen)}
-                  className="py-2.5 px-4 rounded-lg border border-[#E5E9F0] hover:bg-slate-50 text-[#0F172A] font-medium transition-colors cursor-pointer text-center"
+                  className="py-2.5 px-4 rounded-md border border-[#E5E9F0] hover:bg-slate-50 text-[#0F172A] font-medium transition-colors cursor-pointer text-center"
                 >
                   <span>Review manually</span>
                 </button>
@@ -317,7 +317,7 @@ export function OpportunityDrawer({
 
             <div className="text-center text-[10px] text-[#5B6B84] font-mono flex items-center justify-center gap-1 pt-1">
               <FileCheck2 className="w-3 h-3 text-[#5B6B84]" />
-              <span>Action will be logged to audit trail</span>
+              <span>Action will be recorded in Razorpay audit trail</span>
             </div>
           </div>
 

@@ -119,6 +119,82 @@ export default function SettingsPage() {
           </p>
         </div>
 
+        {/* SECTION 0: Razorpay Ecosystem Integration Status */}
+        <div className="bg-white border border-[#E5E9F0] rounded-lg p-5 shadow-2xs space-y-4">
+          <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3">
+            <div>
+              <h3 className="text-sm font-bold text-[#0F172A]">Razorpay Ecosystem Integrations</h3>
+              <p className="text-xs text-[#5B6B84] mt-0.5">Live connectivity to Razorpay merchant infrastructure</p>
+            </div>
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#00C48C]/10 text-[#008760] border border-[#00C48C]/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00C48C] animate-pulse" />
+              CONNECTED
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+            <div className="p-3 bg-[#F8F9FC] border border-[#E5E9F0] rounded-md flex items-center justify-between">
+              <div>
+                <div className="font-semibold text-[#0F172A]">Razorpay Payments</div>
+                <div className="text-[10px] text-[#64748B] font-mono">MID: #rzp_live_89104</div>
+              </div>
+              <span className="text-[10px] font-mono font-bold text-[#008760] bg-[#00C48C]/10 px-1.5 py-0.5 rounded">
+                Connected
+              </span>
+            </div>
+
+            <div className="p-3 bg-[#F8F9FC] border border-[#E5E9F0] rounded-md flex items-center justify-between">
+              <div>
+                <div className="font-semibold text-[#0F172A]">Razorpay Subscriptions</div>
+                <div className="text-[10px] text-[#64748B] font-mono">Auto-debit recovery rail</div>
+              </div>
+              <span className="text-[10px] font-mono font-bold text-[#008760] bg-[#00C48C]/10 px-1.5 py-0.5 rounded">
+                Connected
+              </span>
+            </div>
+
+            <div className="p-3 bg-[#F8F9FC] border border-[#E5E9F0] rounded-md flex items-center justify-between">
+              <div>
+                <div className="font-semibold text-[#0F172A]">Razorpay Payment Links</div>
+                <div className="text-[10px] text-[#64748B] font-mono">UPI dynamic generation</div>
+              </div>
+              <span className="text-[10px] font-mono font-bold text-[#008760] bg-[#00C48C]/10 px-1.5 py-0.5 rounded">
+                Connected
+              </span>
+            </div>
+
+            <div className="p-3 bg-[#F8F9FC] border border-[#E5E9F0] rounded-md flex items-center justify-between">
+              <div>
+                <div className="font-semibold text-[#0F172A]">Webhooks Gateway</div>
+                <div className="text-[10px] text-[#64748B] font-mono">HMAC signature verified</div>
+              </div>
+              <span className="text-[10px] font-mono font-bold text-[#008760] bg-[#00C48C]/10 px-1.5 py-0.5 rounded">
+                Healthy
+              </span>
+            </div>
+
+            <div className="p-3 bg-[#F8F9FC] border border-[#E5E9F0] rounded-md flex items-center justify-between">
+              <div>
+                <div className="font-semibold text-[#0F172A]">Core API Gateway</div>
+                <div className="text-[10px] text-[#64748B] font-mono">Latency &lt; 45ms</div>
+              </div>
+              <span className="text-[10px] font-mono font-bold text-[#008760] bg-[#00C48C]/10 px-1.5 py-0.5 rounded">
+                Operational
+              </span>
+            </div>
+
+            <div className="p-3 bg-[#F8F9FC] border border-[#E5E9F0] rounded-md flex items-center justify-between">
+              <div>
+                <div className="font-semibold text-[#0F172A]">Notification Rails</div>
+                <div className="text-[10px] text-[#64748B] font-mono">WhatsApp · Email · SMS</div>
+              </div>
+              <span className="text-[10px] font-mono font-bold text-[#008760] bg-[#00C48C]/10 px-1.5 py-0.5 rounded">
+                Active
+              </span>
+            </div>
+          </div>
+        </div>
+
         {/* SECTION 1: High-Stakes Environment Segmented Control */}
         <div className="bg-white border border-[#E5E9F0] rounded-xl p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between">

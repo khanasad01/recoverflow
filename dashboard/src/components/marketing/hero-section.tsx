@@ -10,7 +10,6 @@ import {
   ShieldCheck,
   Zap,
   ArrowUpRight,
-  Clock,
   RotateCw,
   FileCheck2,
 } from "lucide-react";
@@ -25,15 +24,16 @@ export function HeroSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
           {/* Left Column: Messaging */}
           <div className="lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#F1F5F9] border border-[#E2E8F0] text-[#0F172A] text-xs font-mono font-semibold uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#F1F5F9] border border-[#E2E8F0] text-[#0F172A] text-xs font-mono font-semibold uppercase tracking-wider">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#00C48C]" />
               <span>PAYMENT RECOVERY INFRASTRUCTURE</span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl lg:text-[54px] font-bold text-[#0F172A] tracking-tight leading-[1.1]">
+            <h1 className="text-[38px] sm:text-[46px] lg:text-[56px] font-bold text-[#0F172A] tracking-tight leading-[1.08] max-w-[580px]">
               Failed payments don&apos;t have to become lost revenue.
             </h1>
 
-            <p className="text-base sm:text-lg text-[#5B6B84] font-normal leading-relaxed max-w-xl">
+            <p className="text-base sm:text-lg text-[#5B6B84] font-normal leading-relaxed max-w-[540px]">
               RecoverFlow detects why a payment failed, evaluates the recovery opportunity, and selects the safest recovery action within the policies you define.
             </p>
 
@@ -41,15 +41,15 @@ export function HeroSection() {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
               <button
                 onClick={() => router.push("/overview")}
-                className="btn-pill-primary px-6 py-3 text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                className="btn-pill-primary px-6 py-3 text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-xs group"
               >
                 <span>Open Recovery Console</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
               </button>
 
               <Link
                 href="#how-it-works"
-                className="px-5 py-3 text-sm font-semibold text-[#0F172A] hover:bg-slate-50 rounded-full border border-[#E5E9F0] text-center transition-colors shadow-2xs"
+                className="px-5 py-3 text-sm font-semibold text-[#0F172A] hover:bg-slate-50 hover:border-[#CBD5E1] rounded-full border border-[#E5E9F0] text-center transition-all shadow-2xs"
               >
                 See how it works →
               </Link>
@@ -58,9 +58,9 @@ export function HeroSection() {
             {/* Supporting Metadata */}
             <div className="pt-6 border-t border-[#E5E9F0] flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-[#5B6B84] font-mono">
               <span className="text-[#0F172A] font-semibold">Razorpay events</span>
-              <span>•</span>
+              <span className="text-[#94A3B8]">•</span>
               <span className="text-[#0F172A] font-semibold">Policy-driven automation</span>
-              <span>•</span>
+              <span className="text-[#94A3B8]">•</span>
               <span className="text-[#0F172A] font-semibold">Full audit trail</span>
             </div>
           </div>
@@ -68,7 +68,7 @@ export function HeroSection() {
           {/* Right Column: Realistic Recovery Console Mockup */}
           <div className="lg:col-span-6">
             <div className="bg-white border border-[#E5E9F0] rounded-xl shadow-xs overflow-hidden text-xs">
-              {/* Window Titlebar */}
+              {/* Window Header */}
               <div className="px-4 py-2.5 bg-[#F8F9FC] border-b border-[#E5E9F0] flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1.5">
@@ -76,13 +76,13 @@ export function HeroSection() {
                     <span className="w-2.5 h-2.5 rounded-full bg-[#E2E8F0]" />
                     <span className="w-2.5 h-2.5 rounded-full bg-[#E2E8F0]" />
                   </div>
-                  <span className="text-[11px] font-mono text-[#5B6B84] ml-2 font-medium">
-                    console / opportunity / #RP_8F42A1
+                  <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-[#5B6B84] ml-2">
+                    RECOVERY CONSOLE
                   </span>
                 </div>
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-mono font-medium">
-                  <Clock className="w-3 h-3" />
-                  <span>ACTION REQUIRED</span>
+                <div className="flex items-center gap-1.5 font-mono text-[10px] text-[#5B6B84]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#00C48C] animate-pulse" />
+                  <span>Real-time Ingestion</span>
                 </div>
               </div>
 
@@ -105,14 +105,14 @@ export function HeroSection() {
 
                   <div className="text-right">
                     <div className="text-xl font-bold font-mono text-[#0F172A]">₹14,850</div>
-                    <span className="text-[10px] font-mono text-[#5B6B84]">INR · HDFC Gateway Rail</span>
+                    <span className="text-[10px] font-mono text-[#5B6B84]">INR · HDFC Gateway</span>
                   </div>
                 </div>
 
-                {/* PAYMENT CONTEXT */}
+                {/* RECOVERY CONTEXT */}
                 <div className="p-3 bg-[#F8F9FC] border border-[#E5E9F0] rounded-lg space-y-2">
                   <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#5B6B84] flex items-center justify-between">
-                    <span>PAYMENT CONTEXT</span>
+                    <span>RECOVERY CONTEXT</span>
                     <span className="text-[#008760] font-semibold bg-[#00C48C]/10 px-1.5 py-0.2 rounded text-[9px]">
                       LOW RISK
                     </span>
@@ -123,25 +123,21 @@ export function HeroSection() {
                       <span className="font-semibold text-[#0F172A]">Rahul Mehta</span>
                     </div>
                     <div>
-                      <span className="text-[#5B6B84] block text-[10px]">Risk Profile:</span>
+                      <span className="text-[#5B6B84] block text-[10px]">Risk:</span>
                       <span className="font-semibold text-[#008760]">Low</span>
                     </div>
-                    <div>
-                      <span className="text-[#5B6B84] block text-[10px]">Previous successful:</span>
-                      <span className="font-mono font-semibold text-[#0F172A]">3 payments</span>
-                    </div>
-                    <div>
-                      <span className="text-[#5B6B84] block text-[10px]">Previous failures:</span>
-                      <span className="font-mono font-semibold text-[#5B6B84]">1 payment</span>
+                    <div className="col-span-2">
+                      <span className="text-[#5B6B84] block text-[10px]">Previous successful payments:</span>
+                      <span className="font-mono font-semibold text-[#0F172A]">3</span>
                     </div>
                   </div>
                 </div>
 
-                {/* RECOVERY RECOMMENDATION */}
+                {/* RECOMMENDED ACTION */}
                 <div className="p-3 bg-blue-50/50 border border-blue-100 rounded-lg space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-mono font-bold text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
-                      <Zap className="w-3 h-3 text-[#1E5EFF]" /> RECOVERY RECOMMENDATION
+                      <Zap className="w-3 h-3 text-[#1E5EFF]" /> RECOMMENDED ACTION
                     </span>
                     <span className="font-mono text-[11px] font-bold text-[#1E5EFF]">
                       88% Recovery Probability
@@ -213,7 +209,7 @@ export function HeroSection() {
 
                   <div className="text-center text-[10px] text-[#5B6B84] font-mono flex items-center justify-center gap-1">
                     <FileCheck2 className="w-3 h-3 text-[#5B6B84]" />
-                    <span>Action will be logged to audit trail</span>
+                    <span>Action will be recorded in audit trail</span>
                   </div>
                 </div>
               </div>

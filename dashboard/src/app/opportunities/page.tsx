@@ -359,84 +359,86 @@ function OpportunitiesContent() {
               <table className={`w-full table-fintech text-left ${density === "compact" ? "compact" : ""}`}>
                 <thead>
                   <tr>
-                    <th>Payment</th>
+                    <th>Opportunity</th>
                     <th>Customer</th>
                     <th className="text-right">Amount</th>
                     <th>Failure Reason</th>
-                    <th>Risk</th>
+                    <th>Recovery Score</th>
                     <th>Recommended Action</th>
-                    <th>Probability</th>
                     <th>Status</th>
-                    <th>Created</th>
-                    <th className="text-right">Action</th>
+                    <th>Age</th>
+                    <th>Last Attempt</th>
+                    <th className="text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredOpportunities.map((opp) => {
                     const scoreVal = opp.latest_score?.recoverability_score ?? 0.88;
+                    const scorePct = Math.round(scoreVal * 100);
                     const isSelected = selectedOpp?.id === opp.id;
-                    const isHighRisk = Number(opp.amount_at_risk || 0) > 50000;
-                    const riskLabel = isHighRisk ? "Medium" : "Low";
                     const actionLabel = (opp.failure_reason || "").includes("funds")
                       ? "Smart Retry"
                       : (opp.failure_reason || "").includes("timeout")
-                      ? "Safe Retry"
-                      : "UPI Link";
+                      ? "Smart Retry"
+                      : (opp.failure_reason || "").includes("limit")
+                      ? "Human Review"
+                      : "Payment Link";
+
+                    // Format created timestamp
+                    const createdDate = new Date(opp.created_at);
+                    const ageDisplay = isNaN(createdDate.getTime()) ? "Just now" : createdDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
                     return (
                       <tr
                         key={opp.id}
                         onClick={() => handleSelectOpp(opp)}
-                        className={`cursor-pointer transition-colors ${isSelected ? "bg-[#F1F4F9]" : ""}`}
+                        className={`cursor-pointer transition-colors ${isSelected ? "bg-[#FFF1F2]" : "hover:bg-[#F8F9FC]"}`}
                       >
-                        <td className="font-mono font-semibold text-[#1E5EFF]">
-                          <div>{opp.id}</div>
-                          {opp.related_opportunity_id && (
-                            <div className="text-[10px] text-[#5B6B84] font-normal font-mono">
-                              ↳ {opp.related_opportunity_id}
-                            </div>
-                          )}
+                        <td className="font-mono font-semibold text-[#0F172A]">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[#E11D48] font-bold">{opp.id}</span>
+                          </div>
                         </td>
-                        <td className="max-w-[120px] truncate text-[#0F172A] font-medium">
-                          {opp.customer_id || "Rahul Mehta"}
+                        <td className="max-w-[140px] truncate text-[#0F172A] font-medium">
+                          {opp.customer_id === "cust_zomato_991"
+                            ? "Acme Technologies"
+                            : opp.customer_id === "cust_swiggy_442"
+                            ? "Rahul Mehta"
+                            : opp.customer_id === "cust_zerodha_001"
+                            ? "Zerodha Broking"
+                            : opp.customer_id === "cust_bharat_772"
+                            ? "Bharat Retail Ltd"
+                            : opp.customer_id || "Enterprise Customer"}
                         </td>
                         <td className="text-right font-mono font-bold text-[#0F172A]">
-                          ₹{Number(opp.amount_at_risk || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                          ₹{Number(opp.amount_at_risk || 0).toLocaleString("en-IN")}
                         </td>
-                        <td className="text-[#5B6B84] max-w-[140px] truncate font-mono text-[11px]">
-                          {opp.failure_reason || "card_declined"}
-                        </td>
-                        <td>
-                          <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold ${
-                              riskLabel === "Low"
-                                ? "bg-[#00C48C]/10 text-[#008760]"
-                                : "bg-amber-50 text-amber-700 border border-amber-200"
-                            }`}
-                          >
-                            {riskLabel}
-                          </span>
+                        <td className="text-[#5B6B84] max-w-[150px] truncate font-sans text-xs">
+                          {opp.failure_reason || "Network timeout"}
                         </td>
                         <td>
-                          <span className="font-mono text-xs font-semibold text-[#0F172A]">
+                          <div className="flex items-center gap-2">
+                            <span className={`font-mono text-xs font-bold ${scorePct >= 80 ? "text-[#008760]" : scorePct >= 60 ? "text-[#D97706]" : "text-[#E11D48]"}`}>
+                              {scorePct}%
+                            </span>
+                            <div className="w-12">
+                              <ScoreBar score={scoreVal} />
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="inline-flex items-center gap-1 font-mono text-xs font-semibold text-[#0F172A] bg-[#F1F5F9] px-2 py-0.5 rounded">
                             {actionLabel}
                           </span>
                         </td>
                         <td>
-                          <div className="flex items-center gap-2">
-                            <div className="w-16">
-                              <ScoreBar score={scoreVal} />
-                            </div>
-                            <span className="font-mono text-[11px] font-bold text-[#0F172A]">
-                              {(scoreVal * 100).toFixed(0)}%
-                            </span>
-                          </div>
-                        </td>
-                        <td>
                           <StatusBadge status={opp.status} size="sm" />
                         </td>
-                        <td className="text-[#5B6B84] font-mono text-[11px] whitespace-nowrap">
-                          {new Date(opp.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        <td className="font-mono text-[11px] text-[#64748B]">
+                          {ageDisplay}
+                        </td>
+                        <td className="font-mono text-[11px] text-[#64748B]">
+                          {opp.retry_count > 0 ? `${opp.retry_count} retries` : "Initial attempt"}
                         </td>
                         <td className="text-right">
                           <button
@@ -444,9 +446,9 @@ function OpportunitiesContent() {
                               e.stopPropagation();
                               handleSelectOpp(opp);
                             }}
-                            className="px-2.5 py-1 text-xs font-semibold text-[#1E5EFF] hover:bg-[#1E5EFF]/10 rounded transition-colors"
+                            className="btn-rzp-secondary px-2.5 py-1 text-xs font-semibold hover:border-[#E11D48] hover:text-[#E11D48]"
                           >
-                            Review
+                            Inspect
                           </button>
                         </td>
                       </tr>

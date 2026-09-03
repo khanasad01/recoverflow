@@ -5,9 +5,11 @@ interface KpiCardProps {
   title: string;
   value: string | number;
   subtitle?: string;
+  contextualExplanation?: string;
   icon: LucideIcon;
   delta?: string;
   isPositive?: boolean;
+  accent?: "red" | "green" | "blue" | "neutral";
   className?: string;
 }
 
@@ -15,46 +17,58 @@ export function KpiCard({
   title,
   value,
   subtitle,
+  contextualExplanation,
   icon: Icon,
   delta,
   isPositive = true,
+  accent = "neutral",
   className = "",
 }: KpiCardProps) {
+  const iconBg = {
+    red: "bg-[#FFE4E6] text-[#E11D48]",
+    green: "bg-[#00C48C]/10 text-[#008760]",
+    blue: "bg-[#E0F2FE] text-[#0284C7]",
+    neutral: "bg-[#F1F5F9] text-[#475569]",
+  }[accent];
+
   return (
     <div
-      className={`bg-white border border-[#E5E9F0] rounded-xl p-5 shadow-xs hover:shadow-sm transition-all duration-200 flex flex-col justify-between ${className}`}
+      className={`bg-white border border-[#E5E9F0] rounded-lg p-4.5 shadow-2xs hover:border-[#CBD5E1] transition-all flex flex-col justify-between ${className}`}
     >
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-semibold text-[#5B6B84] uppercase tracking-wider">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-[11px] font-semibold text-[#5B6B84] uppercase tracking-wider">
           {title}
         </span>
-        <div className="w-10 h-10 rounded-lg bg-[#E8F0FF] text-[#1E5EFF] flex items-center justify-center flex-shrink-0">
-          <Icon className="w-5 h-5 stroke-[1.5]" />
+        <div className={`w-8 h-8 rounded-md ${iconBg} flex items-center justify-center flex-shrink-0`}>
+          <Icon className="w-4 h-4 stroke-[1.75]" />
         </div>
       </div>
 
-      <div className="space-y-1.5">
-        <div className="text-2xl font-semibold font-mono text-[#0F172A] tracking-tight">
+      <div className="space-y-1">
+        <div className="text-2xl sm:text-[26px] font-bold font-mono text-[#0F172A] tracking-tight">
           {value}
         </div>
 
-        <div className="flex items-center justify-between text-xs pt-0.5">
-          {subtitle ? (
-            <span className="text-[#5B6B84] text-[12px]">{subtitle}</span>
-          ) : <span />}
-          {delta && (
+        {delta && (
+          <div className="pt-0.5">
             <span
-              className={`inline-flex items-center gap-1 font-medium text-[12px] px-2 py-0.5 rounded-full ${
+              className={`inline-flex items-center gap-1 font-mono font-medium text-[11px] px-1.5 py-0.5 rounded ${
                 isPositive
-                  ? "text-[#008760] bg-[#00C48C]/10 border border-[#00C48C]/20"
-                  : "text-[#DC2626] bg-[#EF4444]/10 border border-[#EF4444]/20"
+                  ? "text-[#008760] bg-[#00C48C]/10"
+                  : "text-[#DC2626] bg-[#EF4444]/10"
               }`}
             >
-              <span>{isPositive ? "▲" : "▼"}</span>
+              <span>{isPositive ? "↑" : "↓"}</span>
               <span>{delta}</span>
             </span>
-          )}
-        </div>
+          </div>
+        )}
+
+        {(contextualExplanation || subtitle) && (
+          <p className="text-[11px] text-[#64748B] leading-tight pt-1">
+            {contextualExplanation || subtitle}
+          </p>
+        )}
       </div>
     </div>
   );

@@ -20,66 +20,58 @@ export function RecoverFlowLogo({
   }[size];
 
   const textSize = {
-    sm: "text-base",
-    md: "text-lg",
-    lg: "text-xl",
+    sm: "text-sm",
+    md: "text-base",
+    lg: "text-lg",
   }[size];
 
   return (
-    <div className={`inline-flex items-center gap-2.5 ${className}`}>
-      {/* SVG Icon: Flowing 'R' with upward recovery momentum arrow */}
+    <div className={`inline-flex items-center gap-2.5 select-none ${className}`}>
+      {/* Razorpay + RecoverFlow Geometric Mark */}
       <div
-        className={`${iconSize} rounded-xl bg-gradient-to-br from-[#0B5FFF] to-[#00D4FF] p-[1.5px] shadow-lg shadow-[#0B5FFF]/25 flex-shrink-0 flex items-center justify-center`}
+        className={`${iconSize} rounded-md bg-[#0B1B33] border border-white/15 p-1 flex items-center justify-center flex-shrink-0 relative overflow-hidden`}
       >
-        <div className="w-full h-full bg-[#0A1E3C] rounded-[10px] flex items-center justify-center p-1.5">
-          <svg
-            viewBox="0 0 32 32"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-full h-full text-white"
-          >
-            {/* Flowing 'R' backbone */}
-            <path
-              d="M7 6C7 4.89543 7.89543 4 9 4H18C21.866 4 25 7.13401 25 11C25 14.1508 22.919 16.8166 20.0384 17.6528L25.4142 26.2343C25.9686 27.1213 25.3308 28.2857 24.2818 28.2857H19.5858C18.9902 28.2857 18.4372 27.9497 18.1657 27.4206L13.5 18.5H11V27C11 27.5523 10.5523 28 10 28H8C7.44772 28 7 27.5523 7 27V6Z"
-              fill="url(#rf-grad-1)"
-            />
-            {/* Inner negative space / upward growth vector */}
-            <path
-              d="M11 8.5V14H17.5C19.1569 14 20.5 12.6569 20.5 11C20.5 9.34315 19.1569 8.5 17.5 8.5H11Z"
-              fill="#0A1E3C"
-            />
-            {/* Accent Cyan Recovery Spark */}
-            <circle cx="21" cy="7" r="2.5" fill="#00D4FF" />
-            <defs>
-              <linearGradient
-                id="rf-grad-1"
-                x1="7"
-                y1="4"
-                x2="26"
-                y2="28"
-                gradientUnits="userSpaceOnUse"
-              >
-                <stop stopColor="#00D4FF" />
-                <stop offset="0.5" stopColor="#0B5FFF" />
-                <stop offset="1" stopColor="#38BDF8" />
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-full h-full"
+        >
+          {/* Razorpay Rail Lightning Vector */}
+          <path
+            d="M13.5 2L4 13.5H11L9.5 22L20 9.5H13L13.5 2Z"
+            fill="#E11D48"
+          />
+          {/* Recovery Rail Arc */}
+          <path
+            d="M3 5C5.5 3 8.5 2 12 2C17.5 2 22 6.5 22 12C22 14.5 21 16.8 19.5 18.5"
+            stroke="#38BDF8"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeDasharray="2 3"
+          />
+        </svg>
       </div>
 
       {showText && (
         <div className="flex flex-col leading-none">
-          <span
-            className={`font-bold tracking-tight ${textSize} ${
-              theme === "dark" ? "text-white" : "text-[#0F172A]"
-            }`}
-          >
-            Recover<span className="text-[#00D4FF]">Flow</span>
-          </span>
-          <span className="text-[9px] font-mono tracking-widest uppercase font-semibold text-[#00D4FF]/90 mt-0.5">
-            Enterprise Recovery
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span
+              className={`font-bold tracking-tight ${textSize} ${
+                theme === "dark" ? "text-white" : "text-[#0F172A]"
+              }`}
+            >
+              Recover<span className="text-[#E11D48]">Flow</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-1 mt-0.5">
+            <span className="text-[9px] font-sans font-medium text-[#94A3B8] tracking-wide">
+              by
+            </span>
+            <span className="text-[9px] font-bold text-[#E11D48] tracking-wider uppercase">
+              Razorpay
+            </span>
+          </div>
         </div>
       )}
     </div>
