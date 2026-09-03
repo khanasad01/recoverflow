@@ -32,6 +32,11 @@ class PolicyEngine:
                     "allowed_failure_reasons": ["insufficient_funds", "card_declined", "payment_failed", "bad_request_error"],
                     "max_attempts": 10
                 },
+                "whatsapp": {
+                    "max_amount": 50000,
+                    "allowed_failure_reasons": ["card_declined", "insufficient_funds", "payment_failed"],
+                    "max_attempts": 99
+                },
                 "email_reminder": {
                     "max_amount": 50000,
                     "allowed_failure_reasons": ["card_declined", "card_expired", "expired_card", "insufficient_funds", "payment_failed", "bad_request_error"],

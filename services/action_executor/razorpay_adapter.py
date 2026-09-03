@@ -1,15 +1,16 @@
 import logging
+import os
 from typing import Dict, Any
 from sqlalchemy.orm import Session
-from database.models import RevenueOpportunity, Intervention, Customer
-from integrations.razorpay_client import create_payment_link
+from database.models import RevenueOpportunity, Intervention
 from services.action_executor.base import ActionAdapter
+import requests
 
 logger = logging.getLogger(__name__)
 
 
 class RazorpayPaymentLinkAdapter(ActionAdapter):
-    """Adapter to create Razorpay Payment Links for recovery."""
+    """Adapter to create real Razorpay payment link."""
 
     def execute(
         self,
@@ -18,46 +19,51 @@ class RazorpayPaymentLinkAdapter(ActionAdapter):
         db: Session
     ) -> Dict[str, Any]:
         try:
-            amount_paise = int(round(float(opportunity.amount_at_risk) * 100))
-            currency = opportunity.currency or "INR"
-
-            customer_email = None
-            customer_contact = None
-            customer_name = None
-
-            if opportunity.customer_id:
-                customer = db.query(Customer).filter(Customer.id == opportunity.customer_id).first()
-                if customer:
-                    customer_email = customer.email
-                    customer_contact = customer.phone
-                    customer_name = customer.external_id or customer.id
-
-            description = f"RecoverFlow recovery payment for opportunity {opportunity.id}"
-            notes = {
-                "opportunity_id": opportunity.id,
-                "intervention_id": intervention.id,
-                "merchant_id": opportunity.merchant_id,
+            api_key = os.getenv("RAZORPAY_KEY_ID")
+            api_secret = os.getenv("RAZORPAY_KEY_SECRET")
+            
+            # Amount in paise
+            amount_paise = int(float(opportunity.amount_at_risk) * 100)
+            
+            url = "https://api.razorpay.com/v1/payment_links"
+            data = {
+                "amount": amount_paise,
+                "currency": "INR",
+                "description": f"Recovery payment for {opportunity.id}",
+                "customer": {
+                    "name": opportunity.customer_id or "Customer",
+                    "contact": "+918092941953"
+                },
+                "notes": {
+                    "opportunity_id": opportunity.id
+                }
             }
-
-            resp = create_payment_link(
-                amount_paise=amount_paise,
-                currency=currency,
-                customer_id=opportunity.customer_id,
-                customer_name=customer_name,
-                customer_email=customer_email,
-                customer_contact=customer_contact,
-                description=description,
-                notes=notes
+            
+            response = requests.post(
+                url,
+                json=data,
+                auth=(api_key, api_secret),
+                timeout=10
             )
-
-            link_id = resp.get("id") or resp.get("short_url")
-            logger.info(f"Created Razorpay payment link {link_id} for opportunity {opportunity.id}")
-
-            return {
-                "success": True,
-                "external_ref": link_id,
-                "payload": resp
-            }
+            
+            if response.status_code == 200:
+                link_data = response.json()
+                logger.info(f"Created Razorpay payment link {link_data.get('id')} for {opportunity.id}")
+                return {
+                    "success": True,
+                    "external_ref": link_data.get("id"),
+                    "payload": {
+                        "payment_link": link_data.get("short_url"),
+                        "status": "created"
+                    }
+                }
+            else:
+                logger.error(f"Razorpay API error: {response.status_code} - {response.text}")
+                return {
+                    "success": False,
+                    "external_ref": None,
+                    "payload": {"error": f"Razorpay error: {response.text}"}
+                }
         except Exception as e:
             logger.error(f"Error in RazorpayPaymentLinkAdapter: {e}")
             return {
