@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { RecoverFlowLogo } from "@/components/brand/logo";
 
 export function MarketingFooter() {
   return (
@@ -78,15 +79,7 @@ export function MarketingFooter() {
         {/* Middle Brand & Operational Bar */}
         <div className="py-8 border-b border-[#1D3152] flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-[#0D2D52] border border-slate-700 flex items-center justify-center">
-              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-white" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5 4C5 3.44772 5.44772 3 6 3H14C17.3137 3 20 5.68629 20 9C20 11.8344 18.0326 14.2096 15.3676 14.8396L19.4142 20.4206C19.8273 21.0028 19.3905 21.8 18.6657 21.8H14.8C14.3644 21.8 13.9592 21.5647 13.7431 21.1848L9.5 13.5H8V21C8 21.5523 7.55228 22 7 22H5.5C4.94772 22 4.5 21.5523 4.5 21V4H5ZM8 6.5V11H13.5C14.8807 11 16 9.88071 16 8.5C16 7.11929 14.8807 6.5 13.5 6.5H8Z" />
-                <circle cx="17" cy="5.5" r="2" fill="#3395FF" />
-              </svg>
-            </div>
-            <span className="text-sm font-bold text-white tracking-tight">
-              Recover<span className="text-[#1E5EFF]">Flow</span>
-            </span>
+            <RecoverFlowLogo size="sm" theme="dark" />
             <span className="text-xs text-slate-500 ml-2">
               Payment recovery workflow for Razorpay merchants
             </span>

@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 import { useShell } from "./shell-context";
+import { RecoverFlowLogo } from "@/components/brand/logo";
 
 const NAVIGATION_ITEMS = [
   { name: "Overview", href: "/overview", icon: LayoutDashboard },
@@ -57,22 +58,9 @@ export function Sidebar() {
             title="Click to return to Public Homepage"
             className="flex items-center gap-3 overflow-hidden text-left cursor-pointer group w-full"
           >
-            {/* Dark Circular Badge with 'R' and cyan top-right dot (Uploaded logo) */}
-            <div className="w-8 h-8 rounded-full bg-[#0E1E38] border border-white/15 flex items-center justify-center flex-shrink-0 relative shadow-xs group-hover:scale-105 transition-transform">
-              <div className="relative flex items-center justify-center">
-                <span className="font-sans font-black text-white text-[15px] leading-none tracking-tighter">
-                  R
-                </span>
-                <span className="absolute -top-0.5 -right-1 w-1.5 h-1.5 rounded-full bg-[#38BDF8]" />
-              </div>
-            </div>
+            <RecoverFlowLogo size="md" theme="dark" showText={!isCollapsed} />
             {!isCollapsed && (
-              <div className="flex items-center justify-between min-w-0 flex-1">
-                <span className="text-sm font-bold tracking-tight text-white truncate">
-                  Recover<span className="text-[#38BDF8]">Flow</span>
-                </span>
-                <ExternalLink className="w-3 h-3 text-white/40 group-hover:text-white/80 transition-colors flex-shrink-0" />
-              </div>
+              <ExternalLink className="w-3 h-3 text-white/40 group-hover:text-white/80 transition-colors ml-auto flex-shrink-0" />
             )}
           </button>
         </div>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { loginUser } from "@/lib/api";
 import { getToken, setToken, setUser } from "@/lib/auth";
 import { toast } from "sonner";
+import { RecoverFlowLogo } from "@/components/brand/logo";
 
 type AuthMethod = "email" | "google" | "email_otp" | "whatsapp";
 
@@ -263,11 +264,10 @@ export default function LoginPage() {
       <div className="w-full max-w-[440px] bg-white border border-[#E5E9F0] rounded-xl shadow-[0_20px_40px_rgba(10,37,64,0.06)] p-8">
         
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#1E5EFF]"></div>
-            <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">RecoverFlow</h1>
+          <div className="flex items-center justify-center mb-4">
+            <RecoverFlowLogo size="lg" theme="light" />
           </div>
-          <h2 className="text-2xl font-semibold text-[#0F172A]">Sign in to your account</h2>
+          <h2 className="text-xl font-semibold text-[#0F172A]">Sign in to your account</h2>
         </div>
 
         {/* Auth Tabs */}
