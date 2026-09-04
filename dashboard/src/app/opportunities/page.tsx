@@ -400,16 +400,16 @@ function OpportunitiesContent() {
               <table className={`w-full table-fintech text-left ${density === "compact" ? "compact" : ""}`}>
                 <thead>
                   <tr>
-                    <th>Opportunity</th>
-                    <th>Customer</th>
-                    <th className="text-right">Amount</th>
-                    <th>Failure Reason</th>
-                    <th>Recovery Score</th>
-                    <th>Recommended Action</th>
-                    <th>Status</th>
-                    <th>Age</th>
-                    <th>Last Attempt</th>
-                    <th className="text-right">Actions</th>
+                    <th scope="col">Opportunity</th>
+                    <th scope="col">Customer</th>
+                    <th scope="col" className="text-right">Amount</th>
+                    <th scope="col">Failure Reason</th>
+                    <th scope="col">Recovery Score</th>
+                    <th scope="col">Recommended Action</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Age</th>
+                    <th scope="col">Last Attempt</th>
+                    <th scope="col" className="text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -432,8 +432,17 @@ function OpportunitiesContent() {
                     return (
                       <tr
                         key={opp.id}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`View recovery opportunity ${opp.id} for amount ₹${Number(opp.amount_at_risk || 0).toLocaleString("en-IN")}`}
                         onClick={() => handleSelectOpp(opp)}
-                        className={`cursor-pointer transition-colors ${isSelected ? "bg-[#FFF1F2]" : "hover:bg-[#F8F9FC]"}`}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleSelectOpp(opp);
+                          }
+                        }}
+                        className={`cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-[#1E5EFF] focus-visible:bg-[#F8F9FC] ${isSelected ? "bg-[#FFF1F2]" : "hover:bg-[#F8F9FC]"}`}
                       >
                         <td className="font-mono font-semibold text-[#0F172A]">
                           <div className="flex items-center gap-1.5">

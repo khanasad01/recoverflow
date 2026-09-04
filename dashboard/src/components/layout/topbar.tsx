@@ -52,9 +52,18 @@ export function Topbar() {
         setDropdownOpen(false);
       }
     };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && dropdownOpen) {
+        setDropdownOpen(false);
+      }
+    };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [dropdownOpen]);
 
   const routeInfo = ROUTE_TITLES[pathname] || {
     title: "Recovery Overview",
@@ -67,8 +76,9 @@ export function Topbar() {
       <div className="flex items-center gap-3 min-w-0">
         <button
           onClick={() => setIsMobileDrawerOpen(!isMobileDrawerOpen)}
-          className="lg:hidden p-2 rounded-md text-[#0F172A] hover:bg-[#F1F4F9] transition-colors"
-          aria-label="Toggle navigation drawer"
+          className="md:hidden p-2 rounded-md text-[#0F172A] hover:bg-[#F1F4F9] transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF] cursor-pointer"
+          aria-label="Open navigation menu"
+          aria-expanded={isMobileDrawerOpen}
         >
           <Menu className="w-5 h-5 stroke-[1.5]" />
         </button>
@@ -126,7 +136,7 @@ export function Topbar() {
         <button
           onClick={() => toast.info("No unread critical recovery alerts.")}
           aria-label="View notifications"
-          className="relative p-2 rounded-lg text-[#5B6B84] hover:text-[#0F172A] hover:bg-[#F1F4F9] transition-colors cursor-pointer"
+          className="relative p-2 rounded-lg text-[#5B6B84] hover:text-[#0F172A] hover:bg-[#F1F4F9] transition-colors cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF]"
         >
           <Bell className="w-4 h-4 stroke-[1.5]" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#EF4444] rounded-full ring-2 ring-white" />
@@ -136,7 +146,10 @@ export function Topbar() {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center gap-2 p-1 rounded-lg hover:bg-[#F1F4F9] transition-colors cursor-pointer"
+            aria-expanded={dropdownOpen}
+            aria-haspopup="menu"
+            aria-label="User profile menu"
+            className="flex items-center gap-2 p-1 rounded-lg hover:bg-[#F1F4F9] transition-colors cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF]"
           >
             <div className="w-8 h-8 rounded-full bg-[#1E5EFF] text-white font-semibold text-xs flex items-center justify-center shadow-xs">
               {user?.full_name ? user.full_name.charAt(0).toUpperCase() : "A"}
@@ -150,7 +163,11 @@ export function Topbar() {
 
           {/* User Menu Dropdown */}
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white border border-[#E5E9F0] rounded-xl shadow-lg py-1 z-30 animate-in fade-in slide-in-from-top-2 duration-150 text-xs">
+            <div
+              role="menu"
+              aria-label="User options"
+              className="absolute right-0 mt-2 w-56 bg-white border border-[#E5E9F0] rounded-xl shadow-lg py-1 z-30 animate-in fade-in slide-in-from-top-2 duration-150 text-xs"
+            >
               <div className="px-3 py-2 border-b border-[#E5E9F0]">
                 <div className="font-semibold text-[#0F172A]">{user?.full_name || "Administrator"}</div>
                 <div className="text-[11px] text-[#5B6B84] truncate">{user?.email || "admin@recoverflow.dev"}</div>

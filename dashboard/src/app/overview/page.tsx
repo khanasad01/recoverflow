@@ -168,7 +168,7 @@ export default function OverviewPage() {
                     refreshAll();
                   }}
                   className={clsx(
-                    "px-2.5 py-1 rounded text-xs transition-colors font-medium cursor-pointer",
+                    "px-2.5 py-1 rounded text-xs transition-colors font-medium cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF]",
                     timeframe === t
                       ? "bg-[#0A2540] text-white font-bold"
                       : "text-[#5B6B84] hover:text-[#0F172A] hover:bg-slate-50"
@@ -181,7 +181,8 @@ export default function OverviewPage() {
 
             <button
               onClick={refreshAll}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#E5E9F0] bg-white hover:bg-[#F8F9FC] text-xs font-medium text-[#0F172A] transition-colors cursor-pointer shadow-2xs"
+              aria-label="Refresh recovery telemetry"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#E5E9F0] bg-white hover:bg-[#F8F9FC] text-xs font-medium text-[#0F172A] transition-colors cursor-pointer shadow-2xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF]"
             >
               <RefreshCw className="w-3.5 h-3.5 text-[#0F172A]" />
               <span>Refresh</span>
@@ -189,7 +190,7 @@ export default function OverviewPage() {
 
             <Link
               href="/opportunities"
-              className="btn-pill-primary px-3.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 shadow-2xs"
+              className="btn-pill-primary px-3.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 shadow-2xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF]"
             >
               <span>Recovery Queue</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
@@ -615,7 +616,7 @@ export default function OverviewPage() {
                     <button
                       key={item.key}
                       onClick={() => setIsolatedStatus(isolatedStatus === item.key ? null : item.key)}
-                      className={`w-full flex items-center justify-between p-1.5 rounded-lg transition-colors cursor-pointer ${
+                      className={`w-full flex items-center justify-between p-1.5 rounded-lg transition-colors cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF] ${
                         isolatedStatus === item.key ? "bg-[#F1F4F9] font-bold" : "hover:bg-[#F8F9FC]"
                       }`}
                     >
@@ -646,7 +647,7 @@ export default function OverviewPage() {
             </div>
             <Link
               href="/interventions"
-              className="text-xs font-semibold text-[#1E5EFF] hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-[#1E5EFF] hover:underline flex items-center gap-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF] rounded"
             >
               <span>View all</span>
               <ArrowRight className="w-3 h-3" />

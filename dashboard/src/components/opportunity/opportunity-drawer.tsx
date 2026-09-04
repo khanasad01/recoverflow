@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   X,
@@ -62,6 +62,17 @@ export function OpportunityDrawer({
 }: OpportunityDrawerProps) {
   const [manualViewOpen, setManualViewOpen] = useState(false);
 
+  // Close on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   // If explicitly closed, do not render
   if (isOpen === false) return null;
   if (!selectedOpp && !isLoading && !error) return null;
@@ -101,14 +112,20 @@ export function OpportunityDrawer({
       <div
         className="fixed inset-0 bg-[#0A2540]/40 backdrop-blur-xs transition-opacity"
         onClick={onClose}
+        aria-hidden="true"
       />
 
       {/* Drawer Body */}
-      <div className="relative w-full max-w-[500px] bg-white h-full shadow-[0_32px_64px_rgba(10,37,64,0.16)] flex flex-col z-10 animate-in slide-in-from-right duration-200 text-xs">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="drawer-opp-title"
+        className="relative w-full sm:max-w-[500px] bg-white h-full shadow-[0_32px_64px_rgba(10,37,64,0.16)] flex flex-col z-10 animate-in slide-in-from-right duration-200 text-xs"
+      >
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#E5E9F0] flex items-center justify-between bg-[#F8F9FC]">
           <div className="flex items-center gap-2.5">
-            <span className="font-mono font-bold text-sm text-[#0F172A]">
+            <span id="drawer-opp-title" className="font-mono font-bold text-sm text-[#0F172A]">
               {selectedOpp?.id || "Payment Event Detail"}
             </span>
             {selectedOpp && <StatusBadge status={selectedOpp.status} size="sm" />}
@@ -116,7 +133,7 @@ export function OpportunityDrawer({
           <button
             onClick={onClose}
             aria-label="Close drawer"
-            className="p-1.5 rounded-lg text-[#5B6B84] hover:text-[#0F172A] hover:bg-[#E5E9F0] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-[#5B6B84] hover:text-[#0F172A] hover:bg-[#E5E9F0] transition-colors cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF]"
           >
             <X className="w-4 h-4" />
           </button>
@@ -163,7 +180,7 @@ export function OpportunityDrawer({
               <button
                 onClick={onApprove}
                 disabled={actionLoading}
-                className="py-2 px-3 rounded-lg bg-[#00C48C] hover:bg-[#008760] text-white text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                className="py-2 px-3 rounded-lg bg-[#00C48C] hover:bg-[#008760] text-white text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#008760]"
               >
                 <Check className="w-3.5 h-3.5" />
                 <span>Approve Action</span>
@@ -171,7 +188,7 @@ export function OpportunityDrawer({
               <button
                 onClick={onReject}
                 disabled={actionLoading}
-                className="py-2 px-3 rounded-lg bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                className="py-2 px-3 rounded-lg bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#DC2626]"
               >
                 <Ban className="w-3.5 h-3.5" />
                 <span>Reject</span>

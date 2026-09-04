@@ -96,7 +96,7 @@ export default function InterventionsPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActionFilter(tab.id)}
-                  className={`px-2.5 py-1 rounded text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
+                  className={`px-2.5 py-1 rounded text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF] ${
                     actionFilter === tab.id
                       ? "bg-[#0A2540] text-white"
                       : "bg-[#F8F9FC] text-[#5B6B84] hover:text-[#0F172A] border border-[#E5E9F0]"
@@ -146,13 +146,13 @@ export default function InterventionsPage() {
               <table className="w-full table-fintech text-left">
                 <thead>
                   <tr>
-                    <th>Intervention ID</th>
-                    <th>Linked Opportunity</th>
-                    <th>Action Type</th>
-                    <th>Status</th>
-                    <th>Confidence</th>
-                    <th>Decision Reason &amp; Result</th>
-                    <th>Timestamp</th>
+                    <th scope="col">Intervention ID</th>
+                    <th scope="col">Linked Opportunity</th>
+                    <th scope="col">Action Type</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Confidence</th>
+                    <th scope="col">Decision Reason &amp; Result</th>
+                    <th scope="col">Timestamp</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -167,7 +167,7 @@ export default function InterventionsPage() {
                       <td>
                         <Link
                           href={`/opportunities?q=${intv.opportunity_id}`}
-                          className="font-mono text-xs text-[#0F172A] hover:text-[#1E5EFF] hover:underline inline-flex items-center gap-1"
+                          className="font-mono text-xs text-[#0F172A] hover:text-[#1E5EFF] hover:underline inline-flex items-center gap-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF] rounded"
                         >
                           <span>{intv.opportunity_id}</span>
                           <ArrowUpRight className="w-3 h-3 text-[#5B6B84]" />

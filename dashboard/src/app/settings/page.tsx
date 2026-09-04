@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useSWR from "swr";
 import {
   KeyRound,
@@ -55,6 +55,17 @@ export default function SettingsPage() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<"admin" | "support" | "analyst">("support");
   const [userList, setUserList] = useState<UserRecord[]>(INITIAL_USERS);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (showRegenModal) setShowRegenModal(false);
+        if (showInviteModal) setShowInviteModal(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showRegenModal, showInviteModal]);
 
   const copyRzpWebhook = () => {
     const url = settings?.webhook_url || "http://localhost:8000/webhooks/razorpay";
@@ -444,10 +455,10 @@ export default function SettingsPage() {
             <table className="w-full table-fintech text-left">
               <thead>
                 <tr>
-                  <th>Member Name</th>
-                  <th>Work Email</th>
-                  <th>Role</th>
-                  <th>Status</th>
+                  <th scope="col">Member Name</th>
+                  <th scope="col">Work Email</th>
+                  <th scope="col">Role</th>
+                  <th scope="col">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -480,18 +491,24 @@ export default function SettingsPage() {
 
         {/* REGENERATE CONFIRM MODAL */}
         {showRegenModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="regen-modal-title"
+          >
             <div
               className="fixed inset-0 bg-[#0A2540]/60 backdrop-blur-xs transition-opacity"
               onClick={() => setShowRegenModal(false)}
+              aria-hidden="true"
             />
             <div className="relative bg-white rounded-2xl border border-[#E5E9F0] shadow-2xl max-w-sm w-full p-6 z-10 space-y-4 animate-in zoom-in-95 duration-150">
               <div className="flex items-center gap-3 text-[#EF4444]">
-                <div className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center flex-shrink-0">
                   <AlertTriangle className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-[#0F172A]">Regenerate API Key?</h4>
+                  <h4 id="regen-modal-title" className="text-sm font-bold text-[#0F172A]">Regenerate API Key?</h4>
                   <p className="text-xs text-[#5B6B84]">This action is irreversible.</p>
                 </div>
               </div>
@@ -501,13 +518,13 @@ export default function SettingsPage() {
               <div className="flex items-center justify-end gap-2 pt-2">
                 <button
                   onClick={() => setShowRegenModal(false)}
-                  className="btn-pill-secondary px-4 py-2 text-xs font-semibold"
+                  className="btn-pill-secondary px-4 py-2 text-xs font-semibold cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF]"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleRegenerateKey}
-                  className="px-4 py-2 rounded-full bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-semibold shadow-xs cursor-pointer"
+                  className="px-4 py-2 rounded-full bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-semibold shadow-xs cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#DC2626]"
                 >
                   Confirm &amp; Regenerate
                 </button>
@@ -518,20 +535,27 @@ export default function SettingsPage() {
 
         {/* INVITE USER MODAL */}
         {showInviteModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="invite-modal-title"
+          >
             <div
               className="fixed inset-0 bg-[#0A2540]/60 backdrop-blur-xs transition-opacity"
               onClick={() => setShowInviteModal(false)}
+              aria-hidden="true"
             />
             <div className="relative bg-white rounded-2xl border border-[#E5E9F0] shadow-2xl max-w-md w-full p-6 z-10 space-y-4 animate-in zoom-in-95 duration-150">
               <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3">
                 <div className="flex items-center gap-2">
                   <UserPlus className="w-4 h-4 text-[#1E5EFF]" />
-                  <h4 className="text-sm font-bold text-[#0F172A]">Invite Team Member</h4>
+                  <h4 id="invite-modal-title" className="text-sm font-bold text-[#0F172A]">Invite Team Member</h4>
                 </div>
                 <button
                   onClick={() => setShowInviteModal(false)}
-                  className="p-1 rounded-lg text-[#5B6B84] hover:text-[#0F172A]"
+                  aria-label="Close dialog"
+                  className="p-1 rounded-lg text-[#5B6B84] hover:text-[#0F172A] cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF]"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -578,13 +602,13 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={() => setShowInviteModal(false)}
-                    className="btn-pill-secondary px-4 py-2 text-xs font-semibold"
+                    className="btn-pill-secondary px-4 py-2 text-xs font-semibold cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF]"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="btn-pill-primary px-5 py-2 text-xs font-semibold"
+                    className="btn-pill-primary px-5 py-2 text-xs font-semibold cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF]"
                   >
                     Send Invitation
                   </button>

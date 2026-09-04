@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useSWR from "swr";
 import {
   FlaskConical,
@@ -35,6 +35,16 @@ export default function ExperimentsPage() {
   const [newTreatmentPct, setNewTreatmentPct] = useState<number>(50);
   const [targetMetric, setTargetMetric] = useState<string>("recovery_rate");
   const [creating, setCreating] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && showModal) {
+        setShowModal(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showModal]);
 
   const { data: experiments, error: expError, isLoading: loadingExp, mutate: mutateExperiments } = useSWR<Experiment[]>(
     "/api/v1/experiments",
@@ -163,7 +173,7 @@ export default function ExperimentsPage() {
           </div>
 
           {/* Mandatory Confidence Interval Note per §7.7 */}
-          <div className="pt-3 border-t border-[#E5E9F0] text-[11px] text-[#5B6B84] flex items-center justify-between font-mono">
+          <div className="pt-3 border-t border-[#E5E9F0] text-[11px] text-[#5B6B84] flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 font-mono">
             <span>
               95% Confidence Interval: <strong className="text-[#0F172A]">[+19.4%, +28.9%]</strong> (p &lt; 0.001)
             </span>
@@ -241,10 +251,16 @@ export default function ExperimentsPage() {
 
         {/* CREATE EXPERIMENT MODAL */}
         {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="exp-modal-title"
+          >
             <div
               className="fixed inset-0 bg-[#0A2540]/60 backdrop-blur-xs transition-opacity"
               onClick={() => setShowModal(false)}
+              aria-hidden="true"
             />
 
             <div className="relative bg-white rounded-2xl border border-[#E5E9F0] shadow-2xl max-w-md w-full p-6 z-10 space-y-5 animate-in fade-in zoom-in-95 duration-200">
@@ -253,11 +269,12 @@ export default function ExperimentsPage() {
                   <div className="w-7 h-7 rounded-lg bg-[#E8F0FF] text-[#1E5EFF] flex items-center justify-center">
                     <FlaskConical className="w-4 h-4" />
                   </div>
-                  <h3 className="text-sm font-bold text-[#0F172A]">Initialize A/B Experiment</h3>
+                  <h3 id="exp-modal-title" className="text-sm font-bold text-[#0F172A]">Initialize A/B Experiment</h3>
                 </div>
                 <button
                   onClick={() => setShowModal(false)}
-                  className="p-1 rounded-lg text-[#5B6B84] hover:text-[#0F172A]"
+                  aria-label="Close dialog"
+                  className="p-1 rounded-lg text-[#5B6B84] hover:text-[#0F172A] cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF]"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -303,7 +320,7 @@ export default function ExperimentsPage() {
                     step="5"
                     value={newTreatmentPct}
                     onChange={(e) => setNewTreatmentPct(Number(e.target.value))}
-                    className="w-full h-2 bg-[#E5E9F0] rounded-lg accent-[#1E5EFF] cursor-pointer"
+                    className="w-full h-2 bg-[#E5E9F0] rounded-full accent-[#1E5EFF] cursor-pointer"
                   />
                 </div>
 
@@ -311,14 +328,14 @@ export default function ExperimentsPage() {
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="btn-pill-secondary px-4 py-2 text-xs font-semibold"
+                    className="btn-pill-secondary px-4 py-2 text-xs font-semibold cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF]"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={creating || !newExpName}
-                    className="btn-pill-primary px-5 py-2 text-xs font-semibold"
+                    className="btn-pill-primary px-5 py-2 text-xs font-semibold cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF]"
                   >
                     {creating ? "Creating..." : "Launch Cohort"}
                   </button>

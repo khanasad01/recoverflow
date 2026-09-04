@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useSWR from "swr";
 import {
   Save,
@@ -230,6 +230,16 @@ export default function PolicyPage() {
     }
     setShowModal(false);
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && showModal) {
+        setShowModal(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showModal]);
 
   const handleToggleRule = (ruleId: string) => {
     setRules((prev) =>
@@ -507,10 +517,16 @@ export default function PolicyPage() {
 
         {/* CREATE / EDIT RULE MODAL */}
         {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="rule-modal-title"
+          >
             <div
               className="fixed inset-0 bg-[#0A2540]/60 backdrop-blur-xs transition-opacity"
               onClick={() => setShowModal(false)}
+              aria-hidden="true"
             />
 
             <div className="relative bg-white rounded-2xl border border-[#E5E9F0] shadow-2xl max-w-md w-full p-6 z-10 space-y-4 animate-in fade-in zoom-in-95 duration-200 text-xs">
@@ -519,13 +535,14 @@ export default function PolicyPage() {
                   <div className="w-7 h-7 rounded-lg bg-[#E8F0FF] text-[#1E5EFF] flex items-center justify-center">
                     <FileCode2 className="w-4 h-4" />
                   </div>
-                  <h3 className="text-sm font-bold text-[#0F172A]">
+                  <h3 id="rule-modal-title" className="text-sm font-bold text-[#0F172A]">
                     {editingRuleId ? "Edit Recovery Rule" : "Create Recovery Rule"}
                   </h3>
                 </div>
                 <button
                   onClick={() => setShowModal(false)}
-                  className="p-1 rounded-lg text-[#5B6B84] hover:text-[#0F172A] cursor-pointer"
+                  aria-label="Close dialog"
+                  className="p-1 rounded-lg text-[#5B6B84] hover:text-[#0F172A] cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF]"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -596,13 +613,13 @@ export default function PolicyPage() {
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="btn-pill-secondary px-4 py-2 text-xs font-semibold cursor-pointer"
+                    className="btn-pill-secondary px-4 py-2 text-xs font-semibold cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF]"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="btn-pill-primary px-5 py-2 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                    className="btn-pill-primary px-5 py-2 text-xs font-semibold flex items-center gap-1.5 cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF]"
                   >
                     <Check className="w-3.5 h-3.5" />
                     <span>{editingRuleId ? "Save Changes" : "Create Rule"}</span>

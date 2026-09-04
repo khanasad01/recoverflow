@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useSWR from "swr";
 import {
   Mail,
@@ -28,6 +28,16 @@ import { toast } from "sonner";
 
 export default function CustomersPage() {
   const [selectedCust, setSelectedCust] = useState<Customer | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && selectedCust) {
+        setSelectedCust(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedCust]);
 
   const { data: customers, error, isLoading, mutate } = useSWR<Customer[]>(
     "/api/v1/customers",
@@ -75,13 +85,13 @@ export default function CustomersPage() {
               <table className="w-full table-fintech text-left">
                 <thead>
                   <tr>
-                    <th>Customer Identity</th>
-                    <th>Customer ID</th>
-                    <th>Failed Events</th>
-                    <th className="text-right">Avg Amount</th>
-                    <th>Recovery Rate</th>
-                    <th className="text-right">Total Recovered</th>
-                    <th className="text-right">Action</th>
+                    <th scope="col">Customer Identity</th>
+                    <th scope="col">Customer ID</th>
+                    <th scope="col">Failed Events</th>
+                    <th scope="col" className="text-right">Avg Amount</th>
+                    <th scope="col">Recovery Rate</th>
+                    <th scope="col" className="text-right">Total Recovered</th>
+                    <th scope="col" className="text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -93,8 +103,17 @@ export default function CustomersPage() {
                     return (
                       <tr
                         key={c.id}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`View customer details for ${c.email || c.id}`}
                         onClick={() => setSelectedCust(c)}
-                        className="cursor-pointer hover:bg-[#F1F4F9] transition-colors"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSelectedCust(c);
+                          }
+                        }}
+                        className="cursor-pointer hover:bg-[#F1F4F9] focus-visible:bg-[#F1F4F9] focus-visible:outline-2 focus-visible:outline-[#1E5EFF] transition-colors"
                       >
                         {/* Identity */}
                         <td>
@@ -156,9 +175,15 @@ export default function CustomersPage() {
             <div
               className="fixed inset-0 bg-[#0A2540]/40 backdrop-blur-xs transition-opacity"
               onClick={() => setSelectedCust(null)}
+              aria-hidden="true"
             />
 
-            <div className="relative w-full max-w-[480px] bg-white h-full shadow-[0_32px_64px_rgba(10,37,64,0.16)] flex flex-col z-10 animate-in slide-in-from-right duration-200">
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="cust-drawer-title"
+              className="relative w-full sm:max-w-[480px] bg-white h-full shadow-[0_32px_64px_rgba(10,37,64,0.16)] flex flex-col z-10 animate-in slide-in-from-right duration-200"
+            >
               {/* Header */}
               <div className="px-6 py-4 border-b border-[#E5E9F0] flex items-center justify-between bg-[#F8F9FC]">
                 <div className="flex items-center gap-3">
@@ -166,14 +191,14 @@ export default function CustomersPage() {
                     {(selectedCust.email || "C").charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-[#0F172A]">{selectedCust.email || "Customer Profile"}</h3>
+                    <h3 id="cust-drawer-title" className="text-sm font-bold text-[#0F172A]">{selectedCust.email || "Customer Profile"}</h3>
                     <span className="text-[11px] font-mono text-[#5B6B84]">{selectedCust.id}</span>
                   </div>
                 </div>
                 <button
                   onClick={() => setSelectedCust(null)}
                   aria-label="Close drawer"
-                  className="p-1.5 rounded-lg text-[#5B6B84] hover:text-[#0F172A] hover:bg-[#E5E9F0] transition-colors"
+                  className="p-1.5 rounded-lg text-[#5B6B84] hover:text-[#0F172A] hover:bg-[#E5E9F0] transition-colors cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#1E5EFF]"
                 >
                   <X className="w-4 h-4" />
                 </button>
