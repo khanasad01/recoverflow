@@ -57,23 +57,21 @@ export function Sidebar() {
             title="Click to return to Public Homepage"
             className="flex items-center gap-3 overflow-hidden text-left cursor-pointer group w-full"
           >
-            {/* Geometric Razorpay Rail Mark */}
-            <div className="w-8 h-8 rounded-md bg-[#0B1B33] border border-white/15 p-1 flex items-center justify-center flex-shrink-0 relative overflow-hidden group-hover:scale-105 transition-transform">
-              <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
-                <path d="M13.5 2L4 13.5H11L9.5 22L20 9.5H13L13.5 2Z" fill="#E11D48" />
-                <path d="M3 5C5.5 3 8.5 2 12 2C17.5 2 22 6.5 22 12" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" strokeDasharray="2 3" />
-              </svg>
+            {/* Dark Circular Badge with 'R' and cyan top-right dot (Uploaded logo) */}
+            <div className="w-8 h-8 rounded-full bg-[#0E1E38] border border-white/15 flex items-center justify-center flex-shrink-0 relative shadow-xs group-hover:scale-105 transition-transform">
+              <div className="relative flex items-center justify-center">
+                <span className="font-sans font-black text-white text-[15px] leading-none tracking-tighter">
+                  R
+                </span>
+                <span className="absolute -top-0.5 -right-1 w-1.5 h-1.5 rounded-full bg-[#38BDF8]" />
+              </div>
             </div>
             {!isCollapsed && (
-              <div className="flex flex-col min-w-0 flex-1">
-                <span className="text-sm font-bold tracking-tight text-white flex items-center justify-between gap-1 truncate">
-                  <span>Recover<span className="text-[#E11D48]">Flow</span></span>
-                  <ExternalLink className="w-3 h-3 text-white/40 group-hover:text-white/80 transition-colors" />
+              <div className="flex items-center justify-between min-w-0 flex-1">
+                <span className="text-sm font-bold tracking-tight text-white truncate">
+                  Recover<span className="text-[#38BDF8]">Flow</span>
                 </span>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <span className="text-[9px] font-sans text-white/50 tracking-wide">by</span>
-                  <span className="text-[9px] font-bold text-[#E11D48] tracking-wider uppercase">Razorpay</span>
-                </div>
+                <ExternalLink className="w-3 h-3 text-white/40 group-hover:text-white/80 transition-colors flex-shrink-0" />
               </div>
             )}
           </button>

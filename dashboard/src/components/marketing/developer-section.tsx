@@ -153,7 +153,7 @@ export function DeveloperSection() {
             <div className="pt-4 flex items-center gap-4">
               <Link
                 href="/login"
-                className="btn-pill-primary px-6 py-3 text-sm font-semibold inline-flex items-center gap-2"
+                className="px-6 py-3 text-sm font-semibold rounded-lg bg-[#0A2540] hover:bg-[#123359] text-white border border-[#1D3152] shadow-xs inline-flex items-center gap-2 transition-colors"
               >
                 <span>Read API Documentation</span>
                 <ExternalLink className="w-4 h-4" />

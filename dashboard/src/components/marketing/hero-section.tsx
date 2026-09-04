@@ -41,7 +41,7 @@ export function HeroSection() {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
               <button
                 onClick={() => router.push("/overview")}
-                className="btn-pill-primary px-6 py-3 text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-xs group"
+                className="px-6 py-3 text-sm font-semibold rounded-lg bg-[#0A2540] hover:bg-[#123359] text-white border border-[#1D3152] shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-all duration-150 group"
               >
                 <span>Open Recovery Console</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
@@ -49,7 +49,7 @@ export function HeroSection() {
 
               <Link
                 href="#how-it-works"
-                className="px-5 py-3 text-sm font-semibold text-[#0F172A] hover:bg-slate-50 hover:border-[#CBD5E1] rounded-full border border-[#E5E9F0] text-center transition-all shadow-2xs"
+                className="px-5 py-3 text-sm font-semibold text-[#0F172A] hover:bg-slate-50 hover:border-[#CBD5E1] rounded-lg border border-[#E5E9F0] text-center transition-all shadow-2xs"
               >
                 See how it works →
               </Link>

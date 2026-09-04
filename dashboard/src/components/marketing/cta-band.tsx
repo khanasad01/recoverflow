@@ -24,7 +24,7 @@ export function CtaBand() {
           <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href="/overview"
-              className="btn-pill-primary px-7 py-3 text-sm font-semibold w-full sm:w-auto inline-flex items-center justify-center gap-2 shadow-xs"
+              className="px-7 py-3 text-sm font-semibold w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-white text-[#0A2540] hover:bg-slate-100 shadow-xs transition-colors"
             >
               <span>Open Recovery Console</span>
               <ArrowRight className="w-4 h-4" />
@@ -32,7 +32,7 @@ export function CtaBand() {
 
             <Link
               href="#developer"
-              className="px-6 py-3 text-sm font-semibold w-full sm:w-auto text-center text-white border border-white/20 hover:bg-white/10 rounded-full transition-colors"
+              className="px-6 py-3 text-sm font-semibold w-full sm:w-auto text-center text-white border border-white/20 hover:bg-white/10 rounded-lg transition-colors"
             >
               View API Documentation
             </Link>
