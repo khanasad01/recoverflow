@@ -24,6 +24,8 @@ import { AppLayout } from "@/components/layout/app-layout";
 import { ScoreBar } from "@/components/ui/score-bar";
 import { LoadingTableSkeleton, EmptyTableState, ErrorTableState } from "@/components/ui/table-states";
 
+import { toast } from "sonner";
+
 export default function CustomersPage() {
   const [selectedCust, setSelectedCust] = useState<Customer | null>(null);
 
@@ -50,15 +52,23 @@ export default function CustomersPage() {
           {error ? (
             <ErrorTableState
               title="Unable to load customer profiles"
-              description="Failed to communicate with customer intelligence store."
-              onRetry={() => mutate()}
+              description="Failed to communicate with customer intelligence store. Please check network connection and try again."
+              onRetry={() => {
+                mutate();
+                toast.info("Retrying customer profiles synchronization...");
+              }}
             />
           ) : isLoading ? (
-            <LoadingTableSkeleton rows={6} cols={6} />
+            <LoadingTableSkeleton rows={6} cols={7} />
           ) : !customers || customers.length === 0 ? (
             <EmptyTableState
               title="No customer profiles found"
-              description="Profiles are automatically indexed as payment events ingest into the gateway."
+              description="No customer profiles found. Customer intelligence profiles are automatically generated as transactions ingest."
+              actionLabel="Refresh Profiles"
+              onAction={() => {
+                mutate();
+                toast.success("Customer profiles refreshed.");
+              }}
             />
           ) : (
             <div className="overflow-x-auto">

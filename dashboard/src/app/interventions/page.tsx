@@ -16,6 +16,7 @@ import { fetcher, Intervention } from "@/lib/api";
 import { AppLayout } from "@/components/layout/app-layout";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { LoadingTableSkeleton, EmptyTableState, ErrorTableState } from "@/components/ui/table-states";
+import { toast } from "sonner";
 
 export default function InterventionsPage() {
   const [actionFilter, setActionFilter] = useState<string>("");
@@ -112,20 +113,32 @@ export default function InterventionsPage() {
         <div className="bg-white border border-[#E5E9F0] rounded-xl shadow-sm overflow-hidden">
           {error ? (
             <ErrorTableState
-              title="Unable to load intervention ledger"
-              description="Failed to communicate with the action execution log."
-              onRetry={() => mutate()}
+              title="Unable to load activity ledger"
+              description="Failed to communicate with the action execution log. Please try again."
+              onRetry={() => {
+                mutate();
+                toast.info("Retrying activity ledger synchronization...");
+              }}
             />
           ) : isLoading ? (
-            <LoadingTableSkeleton rows={6} cols={6} />
+            <LoadingTableSkeleton rows={8} cols={7} />
           ) : filteredInterventions.length === 0 ? (
             <EmptyTableState
-              title="No interventions found"
-              description="When the engine acts upon decline events, audited action entries will appear here."
-              actionLabel="Clear Filter"
+              title="No activity recorded yet"
+              description={
+                actionFilter || searchQuery
+                  ? "No intervention records match your search or filter criteria."
+                  : "No activity recorded yet. Recovery events will appear here."
+              }
+              actionLabel={actionFilter || searchQuery ? "Clear Filters" : "Refresh Activity"}
               onAction={() => {
-                setActionFilter("");
-                setSearchQuery("");
+                if (actionFilter || searchQuery) {
+                  setActionFilter("");
+                  setSearchQuery("");
+                } else {
+                  mutate();
+                  toast.success("Activity feed refreshed.");
+                }
               }}
             />
           ) : (

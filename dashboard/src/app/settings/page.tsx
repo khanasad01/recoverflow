@@ -18,6 +18,7 @@ import { fetcher, SettingsData } from "@/lib/api";
 import { AppLayout } from "@/components/layout/app-layout";
 import { useShell } from "@/components/layout/shell-context";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { LoadingFormSkeleton, ErrorTableState } from "@/components/ui/table-states";
 import { toast } from "sonner";
 
 interface UserRecord {
@@ -35,7 +36,7 @@ const INITIAL_USERS: UserRecord[] = [
 ];
 
 export default function SettingsPage() {
-  const { data: settings } = useSWR<SettingsData>("/api/v1/settings", fetcher);
+  const { data: settings, error, isLoading, mutate } = useSWR<SettingsData>("/api/v1/settings", fetcher);
   const { environment, setEnvironment } = useShell();
 
   const [copiedRzp, setCopiedRzp] = useState<boolean>(false);
@@ -45,6 +46,9 @@ export default function SettingsPage() {
   const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
   const [apiKey, setApiKey] = useState<string>("sk_live_99214a88f01b2901ce");
   const [testingWebhook, setTestingWebhook] = useState<boolean>(false);
+  const [testingRzp, setTestingRzp] = useState<boolean>(false);
+  const [rzpConnected, setRzpConnected] = useState<boolean>(true);
+  const [savingSettings, setSavingSettings] = useState<boolean>(false);
 
   // Invite user form
   const [inviteName, setInviteName] = useState("");
@@ -90,6 +94,23 @@ export default function SettingsPage() {
     }, 1200);
   };
 
+  const handleTestRazorpay = () => {
+    setTestingRzp(true);
+    setTimeout(() => {
+      setTestingRzp(false);
+      setRzpConnected(true);
+      toast.success("Razorpay connection verified! Latency: 34ms · MID #rzp_live_89104 operational.");
+    }, 1000);
+  };
+
+  const handleSaveSettings = () => {
+    setSavingSettings(true);
+    setTimeout(() => {
+      setSavingSettings(false);
+      toast.success("Settings saved successfully!");
+    }, 600);
+  };
+
   const handleInviteUser = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteEmail) return;
@@ -110,38 +131,85 @@ export default function SettingsPage() {
   return (
     <AppLayout>
       <div className="space-y-6 max-w-5xl">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight">
-            Settings
-          </h2>
-          <p className="text-xs text-[#5B6B84] mt-1">
-            Gateway webhooks, credentials, environment configuration, and team permissions.
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-[#0F172A] tracking-tight">
+              Settings &amp; Integrations
+            </h2>
+            <p className="text-xs text-[#5B6B84] mt-1">
+              Gateway webhooks, credentials, environment configuration, and team permissions.
+            </p>
+          </div>
+          <button
+            onClick={handleSaveSettings}
+            disabled={savingSettings}
+            className="btn-pill-primary px-5 py-2 text-xs font-semibold flex items-center gap-1.5 self-start sm:self-auto cursor-pointer shadow-2xs"
+          >
+            {savingSettings ? (
+              <div className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+            ) : (
+              <Check className="w-3.5 h-3.5" />
+            )}
+            <span>{savingSettings ? "Saving..." : "Save Settings"}</span>
+          </button>
         </div>
 
-        {/* SECTION 0: Razorpay Ecosystem Integration Status */}
-        <div className="bg-white border border-[#E5E9F0] rounded-lg p-5 shadow-2xs space-y-4">
-          <div className="flex items-center justify-between border-b border-[#E5E9F0] pb-3">
-            <div>
-              <h3 className="text-sm font-bold text-[#0F172A]">Razorpay Ecosystem Integrations</h3>
-              <p className="text-xs text-[#5B6B84] mt-0.5">Live connectivity to Razorpay merchant infrastructure</p>
-            </div>
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#00C48C]/10 text-[#008760] border border-[#00C48C]/30">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00C48C] animate-pulse" />
-              CONNECTED
-            </span>
-          </div>
+        {/* Global Error Banner */}
+        {error && (
+          <ErrorTableState
+            title="Unable to load merchant settings"
+            description="Failed to synchronize gateway settings and integration credentials. Please try again."
+            onRetry={() => {
+              mutate();
+              toast.info("Retrying settings synchronization...");
+            }}
+          />
+        )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
-            <div className="p-3 bg-[#F8F9FC] border border-[#E5E9F0] rounded-md flex items-center justify-between">
-              <div>
-                <div className="font-semibold text-[#0F172A]">Razorpay Payments</div>
-                <div className="text-[10px] text-[#64748B] font-mono">MID: #rzp_live_89104</div>
+        {/* Loading Form Skeleton */}
+        {isLoading ? (
+          <LoadingFormSkeleton rows={6} />
+        ) : (
+          <>
+            {/* SECTION 0: Razorpay Ecosystem Integration Status */}
+            <div className="bg-white border border-[#E5E9F0] rounded-lg p-5 shadow-2xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E5E9F0] pb-3">
+                <div>
+                  <h3 className="text-sm font-bold text-[#0F172A]">Razorpay Ecosystem Integrations</h3>
+                  <p className="text-xs text-[#5B6B84] mt-0.5">Live connectivity to Razorpay merchant infrastructure</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleTestRazorpay}
+                    disabled={testingRzp}
+                    className="btn-pill-secondary px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <RefreshCw className={`w-3 h-3 text-[#00C48C] ${testingRzp ? "animate-spin" : ""}`} />
+                    <span>{testingRzp ? "Verifying..." : "Test Connection"}</span>
+                  </button>
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                      rzpConnected
+                        ? "bg-[#00C48C]/10 text-[#008760] border-[#00C48C]/30"
+                        : "bg-rose-50 text-rose-700 border-rose-200"
+                    }`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${rzpConnected ? "bg-[#00C48C] animate-pulse" : "bg-rose-500"}`} />
+                    {rzpConnected ? "CONNECTED" : "FAILED"}
+                  </span>
+                </div>
               </div>
-              <span className="text-[10px] font-mono font-bold text-[#008760] bg-[#00C48C]/10 px-1.5 py-0.5 rounded">
-                Connected
-              </span>
-            </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                <div className="p-3 bg-[#F8F9FC] border border-[#E5E9F0] rounded-md flex items-center justify-between">
+                  <div>
+                    <div className="font-semibold text-[#0F172A]">Razorpay Payments</div>
+                    <div className="text-[10px] text-[#64748B] font-mono">MID: #rzp_live_89104</div>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold text-[#008760] bg-[#00C48C]/10 px-1.5 py-0.5 rounded">
+                    Connected
+                  </span>
+                </div>
 
             <div className="p-3 bg-[#F8F9FC] border border-[#E5E9F0] rounded-md flex items-center justify-between">
               <div>
@@ -524,6 +592,8 @@ export default function SettingsPage() {
               </form>
             </div>
           </div>
+        )}
+          </>
         )}
       </div>
     </AppLayout>

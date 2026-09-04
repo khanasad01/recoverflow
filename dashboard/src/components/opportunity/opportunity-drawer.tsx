@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import {
   X,
   ShieldCheck,
@@ -16,9 +17,12 @@ import {
   CheckCircle2,
   User,
   FileCheck2,
+  CreditCard,
+  ArrowUpRight,
 } from "lucide-react";
 import { Opportunity, EvidenceEvent } from "@/lib/api";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { ErrorTableState } from "@/components/ui/table-states";
 
 export interface ActionResult {
   actionType: string;
@@ -30,7 +34,11 @@ export interface ActionResult {
 }
 
 interface OpportunityDrawerProps {
+  isOpen?: boolean;
   opportunity: Opportunity | null;
+  isLoading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   onClose: () => void;
   onAction: (actionType: string) => Promise<void>;
   onApprove: () => Promise<void>;
@@ -40,7 +48,11 @@ interface OpportunityDrawerProps {
 }
 
 export function OpportunityDrawer({
+  isOpen = true,
   opportunity: selectedOpp,
+  isLoading = false,
+  error = null,
+  onRetry,
   onClose,
   onAction,
   onApprove,
@@ -50,14 +62,16 @@ export function OpportunityDrawer({
 }: OpportunityDrawerProps) {
   const [manualViewOpen, setManualViewOpen] = useState(false);
 
-  if (!selectedOpp) return null;
+  // If explicitly closed, do not render
+  if (isOpen === false) return null;
+  if (!selectedOpp && !isLoading && !error) return null;
 
-  const scoreVal = selectedOpp.latest_score?.recoverability_score ?? 0.88;
-  const expectedVal = selectedOpp.latest_score?.expected_recovery ?? selectedOpp.amount_at_risk;
-  const isHighValue = Number(selectedOpp.amount_at_risk || 0) >= 50000;
-  const isHumanReview = selectedOpp.status === "HUMAN_REVIEW" || isHighValue;
+  const scoreVal = selectedOpp?.latest_score?.recoverability_score ?? 0.88;
+  const expectedVal = selectedOpp?.latest_score?.expected_recovery ?? selectedOpp?.amount_at_risk;
+  const isHighValue = Number(selectedOpp?.amount_at_risk || 0) >= 50000;
+  const isHumanReview = selectedOpp?.status === "HUMAN_REVIEW" || isHighValue;
 
-  const opportunityEvidence: EvidenceEvent[] = (selectedOpp.interventions || []).map((intv) => {
+  const opportunityEvidence: EvidenceEvent[] = (selectedOpp?.interventions || []).map((intv) => {
     let reasonText = intv.decision_reason || `Intervention ${intv.action_type} executed`;
     if (intv.external_ref) {
       if (intv.action_type === "incentive") {
@@ -94,20 +108,52 @@ export function OpportunityDrawer({
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#E5E9F0] flex items-center justify-between bg-[#F8F9FC]">
           <div className="flex items-center gap-2.5">
-            <span className="font-mono font-bold text-sm text-[#0F172A]">{selectedOpp.id}</span>
-            <StatusBadge status={selectedOpp.status} size="sm" />
+            <span className="font-mono font-bold text-sm text-[#0F172A]">
+              {selectedOpp?.id || "Payment Event Detail"}
+            </span>
+            {selectedOpp && <StatusBadge status={selectedOpp.status} size="sm" />}
           </div>
           <button
             onClick={onClose}
             aria-label="Close drawer"
-            className="p-1.5 rounded-lg text-[#5B6B84] hover:text-[#0F172A] hover:bg-[#E5E9F0] transition-colors"
+            className="p-1.5 rounded-lg text-[#5B6B84] hover:text-[#0F172A] hover:bg-[#E5E9F0] transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* High Value Escalation Gate */}
-        {selectedOpp.status === "HUMAN_REVIEW" && (
+        {/* Loading State */}
+        {isLoading ? (
+          <div className="p-6 space-y-4 animate-pulse flex-1 overflow-y-auto">
+            <div className="h-24 bg-[#F8F9FC] border border-[#E5E9F0] rounded-xl" />
+            <div className="h-28 bg-white border border-[#E5E9F0] rounded-xl" />
+            <div className="h-32 bg-blue-50/40 border border-blue-100 rounded-xl" />
+            <div className="h-10 bg-[#E5E9F0] rounded-md" />
+          </div>
+        ) : error ? (
+          /* Error State */
+          <div className="p-6 my-auto">
+            <ErrorTableState
+              title="Unable to load payment details"
+              description={error}
+              onRetry={onRetry}
+            />
+          </div>
+        ) : !selectedOpp ? (
+          /* Empty State when no payment selected */
+          <div className="p-8 flex flex-col items-center justify-center text-center my-auto">
+            <div className="w-12 h-12 rounded-xl bg-[#F1F4F9] border border-[#E5E9F0] text-[#5B6B84] flex items-center justify-center mb-3">
+              <CreditCard className="w-6 h-6 stroke-[1.5]" />
+            </div>
+            <h4 className="text-sm font-semibold text-[#0F172A]">No payment selected</h4>
+            <p className="text-xs text-[#5B6B84] mt-1 max-w-xs leading-relaxed">
+              Select a payment failure opportunity from the recovery queue to inspect recovery score, policy compliance, and autonomous actions.
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* High Value Escalation Gate */}
+            {selectedOpp.status === "HUMAN_REVIEW" && (
           <div className="p-4 bg-amber-50 border-b border-amber-200 space-y-2.5">
             <div className="flex items-center gap-2 text-xs font-bold text-amber-900">
               <ShieldCheck className="w-4 h-4 text-amber-600" />
@@ -268,32 +314,52 @@ export function OpportunityDrawer({
           {/* ACTION BUTTONS */}
           <div className="space-y-2">
             {lastActionResult ? (
-              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
+              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-emerald-900 flex items-center gap-1.5">
+                  <span className="font-semibold text-emerald-900 flex items-center gap-1.5 text-xs">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    Recovery Action Dispatched
+                    Payment recovered successfully
                   </span>
                   <span className="font-mono text-[10px] font-bold bg-white px-2 py-0.5 rounded border border-emerald-200 text-emerald-800">
-                    {lastActionResult.status}
+                    {lastActionResult.status || "CAPTURED"}
                   </span>
                 </div>
+                <div className="text-[11px] font-mono text-[#0F172A] flex items-center justify-between">
+                  <span>Recovered Amount:</span>
+                  <span className="font-bold text-[#008760] text-sm">
+                    ₹{Number(selectedOpp.amount_at_risk || 0).toLocaleString("en-IN")}
+                  </span>
+                </div>
+                {lastActionResult.details && (
+                  <p className="text-[11px] text-[#0F172A] bg-white/70 p-2 rounded border border-emerald-100">
+                    {lastActionResult.details}
+                  </p>
+                )}
                 {lastActionResult.externalRef && (
                   <div className="text-[11px] font-mono text-[#0F172A]">
-                    Reference: <span className="font-bold">{lastActionResult.externalRef}</span>
+                    Razorpay Reference: <span className="font-bold">{lastActionResult.externalRef}</span>
                   </div>
                 )}
-                {lastActionResult.url && (
-                  <a
-                    href={lastActionResult.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                <div className="flex items-center justify-between pt-2 border-t border-emerald-200/60 text-xs">
+                  <Link
+                    href={`/interventions?q=${selectedOpp.id}`}
                     className="text-[11px] text-[#1E5EFF] font-semibold hover:underline inline-flex items-center gap-1"
                   >
-                    <span>View in Razorpay Dashboard</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                )}
+                    <span>View Audit Trail</span>
+                    <ArrowUpRight className="w-3 h-3" />
+                  </Link>
+                  {lastActionResult.url && (
+                    <a
+                      href={lastActionResult.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] text-[#5B6B84] hover:text-[#0F172A] inline-flex items-center gap-1 font-medium"
+                    >
+                      <span>Razorpay Console</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-2">
@@ -391,6 +457,8 @@ export function OpportunityDrawer({
             </div>
           </div>
         </div>
+          </>
+        )}
       </div>
     </div>
   );

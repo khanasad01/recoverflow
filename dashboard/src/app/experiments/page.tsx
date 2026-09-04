@@ -26,7 +26,7 @@ import {
 } from "@/lib/api";
 import { AppLayout } from "@/components/layout/app-layout";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { EmptyTableState, ErrorTableState } from "@/components/ui/table-states";
+import { LoadingCardSkeleton, EmptyTableState, ErrorTableState } from "@/components/ui/table-states";
 import { toast } from "sonner";
 
 export default function ExperimentsPage() {
@@ -108,11 +108,12 @@ export default function ExperimentsPage() {
         {/* Global Error Banner */}
         {expError && (
           <ErrorTableState
-            title="Experiments Store Unavailable"
-            description="Unable to synchronize A/B experiment telemetry with the analytics engine."
+            title="Unable to load experiment analytics"
+            description="Unable to synchronize A/B experiment telemetry with the analytics engine. Please try again."
             onRetry={() => {
               mutateExperiments();
               mutateLift();
+              toast.info("Retrying experiment analytics synchronization...");
             }}
           />
         )}
@@ -179,15 +180,11 @@ export default function ExperimentsPage() {
           </div>
 
           {loadingExp ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-44 bg-white border border-[#E5E9F0] rounded-xl p-5 animate-pulse" />
-              ))}
-            </div>
+            <LoadingCardSkeleton count={3} className="grid grid-cols-1 md:grid-cols-3 gap-4" />
           ) : !experiments || experiments.length === 0 ? (
             <EmptyTableState
               title="No experiments configured"
-              description="Create an A/B experiment cohort to begin measuring statistically verified recovery lift."
+              description="No experiments configured. Create your first A/B experiment cohort to measure statistically verified recovery lift."
               actionLabel="Create Cohort"
               onAction={() => setShowModal(true)}
             />

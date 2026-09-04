@@ -47,6 +47,8 @@ function OpportunitiesContent() {
   );
   const [density, setDensity] = useState<"comfortable" | "compact">(storedDensity);
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
+  const [detailLoading, setDetailLoading] = useState<boolean>(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<boolean>(false);
   const [lastActionResult, setLastActionResult] = useState<{
     actionType: string;
@@ -60,13 +62,34 @@ function OpportunitiesContent() {
   const handleSelectOpp = async (opp: Opportunity) => {
     setSelectedOpp(opp);
     setLastActionResult(null);
+    setDetailError(null);
+    setDetailLoading(true);
     try {
       const detail = await fetcher(`/api/v1/opportunities/${opp.id}`);
       if (detail && detail.id === opp.id) {
         setSelectedOpp(detail);
       }
-    } catch {
-      // Keep basic opp data if detail endpoint fails
+    } catch (err: unknown) {
+      // Keep basic opp data if detail endpoint fails, but note error
+      setDetailError((err as Error).message || "Failed to load detailed diagnostics.");
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const handleRetryDetail = async () => {
+    if (!selectedOpp) return;
+    setDetailLoading(true);
+    setDetailError(null);
+    try {
+      const detail = await fetcher(`/api/v1/opportunities/${selectedOpp.id}`);
+      if (detail && detail.id === selectedOpp.id) {
+        setSelectedOpp(detail);
+      }
+    } catch (err: unknown) {
+      setDetailError((err as Error).message || "Failed to load payment details.");
+    } finally {
+      setDetailLoading(false);
     }
   };
 
@@ -341,18 +364,36 @@ function OpportunitiesContent() {
         <div className="bg-white border border-[#E5E9F0] rounded-xl shadow-sm overflow-hidden">
           {error ? (
             <ErrorTableState
-              title="Failed to load opportunities"
-              description="Unable to fetch active failure events from the ingestion gateway."
-              onRetry={() => mutate()}
+              title="Unable to load payment events"
+              description="Failed to communicate with the recovery ingestion gateway. Please try again."
+              onRetry={() => {
+                mutate();
+                toast.info("Retrying payment event synchronization...");
+              }}
             />
           ) : isLoading ? (
             <LoadingTableSkeleton rows={8} cols={8} />
           ) : filteredOpportunities.length === 0 ? (
             <EmptyTableState
-              title="No opportunities found"
-              description="No payment decline candidates matching your selected filter criteria."
-              actionLabel="Clear Filters"
-              onAction={handleClearFilters}
+              title="No failed payments found"
+              description={
+                statusFilter || sourceFilter || searchQuery || minScore > 0
+                  ? "No payment failures match your active filter criteria."
+                  : "No failed payments are currently eligible for recovery."
+              }
+              actionLabel={
+                statusFilter || sourceFilter || searchQuery || minScore > 0
+                  ? "Clear Filters"
+                  : "Refresh Queue"
+              }
+              onAction={
+                statusFilter || sourceFilter || searchQuery || minScore > 0
+                  ? handleClearFilters
+                  : () => {
+                      mutate();
+                      toast.success("Recovery queue refreshed.");
+                    }
+              }
             />
           ) : (
             <div className="overflow-x-auto">
@@ -461,9 +502,14 @@ function OpportunitiesContent() {
         </div>
 
         <OpportunityDrawer
+          isOpen={selectedOpp !== null || detailLoading || detailError !== null}
           opportunity={selectedOpp}
+          isLoading={detailLoading}
+          error={detailError}
+          onRetry={handleRetryDetail}
           onClose={() => {
             setSelectedOpp(null);
+            setDetailError(null);
             setLastActionResult(null);
           }}
           onAction={handleManualAction}

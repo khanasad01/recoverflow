@@ -37,6 +37,8 @@ import { KpiCard } from "@/components/ui/kpi-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { LoadingTableSkeleton, EmptyTableState, ErrorTableState } from "@/components/ui/table-states";
 
+import { toast } from "sonner";
+
 const STATUS_COLORS: Record<string, string> = {
   RECOVERED: "#00C48C",
   ACTIONED: "#F59E0B",
@@ -96,6 +98,7 @@ export default function OverviewPage() {
   const refreshAll = () => {
     mutateOverview();
     mutateOpps();
+    toast.success("Recovery telemetry refreshed.");
   };
 
   // Trajectory series: prefer API time_series if available, otherwise use designated timeframe data
@@ -103,8 +106,6 @@ export default function OverviewPage() {
     data?.time_series && data.time_series.length > 0
       ? data.time_series
       : TRAJECTORY_DATA[timeframe];
-
-
 
   // Donut data with isolation filter
   const rawDonutData = [
@@ -200,55 +201,70 @@ export default function OverviewPage() {
         {overviewError && (
           <ErrorTableState
             title="Overview Telemetry Offline"
-            description="Unable to synchronize live metrics with the Recovery Gateway."
+            description="Unable to synchronize live metrics with the Recovery Gateway. Please try again."
             onRetry={refreshAll}
           />
         )}
 
         {/* PRIMARY FINANCIAL KPI ROW (5 CARDS) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
-          <KpiCard
-            title="Recoverable Revenue"
-            value="₹31,44,680"
-            contextualExplanation="Identified failure volume eligible for recovery policies"
-            icon={Layers}
-            accent="blue"
-          />
-          <KpiCard
-            title="Recovered Revenue"
-            value="₹28,91,450"
-            delta="24.7% vs previous 7 days"
-            contextualExplanation="Captured through successful recovery actions"
-            icon={CheckCircle2}
-            isPositive={true}
-            accent="green"
-          />
-          <KpiCard
-            title="Recovery Rate"
-            value="74.2%"
-            delta="+18.4% lift"
-            contextualExplanation="Recovered revenue as percentage of recoverable"
-            icon={TrendingUp}
-            isPositive={true}
-            accent="green"
-          />
-          <KpiCard
-            title="Active Opportunities"
-            value="44"
-            contextualExplanation="142 total opportunities tracked across rails"
-            icon={AlertCircle}
-            accent="red"
-          />
-          <KpiCard
-            title="Avg. Time to Recover"
-            value="2.4 days"
-            delta="-0.8d vs baseline"
-            contextualExplanation="Average duration from initial decline to settlement"
-            icon={Activity}
-            isPositive={true}
-            accent="neutral"
-          />
-        </div>
+        {loadingOverview ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="bg-white border border-[#E5E9F0] rounded-xl p-4 shadow-2xs animate-pulse space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="h-3.5 bg-[#E5E9F0] rounded w-2/3" />
+                  <div className="w-6 h-6 rounded bg-[#E5E9F0]" />
+                </div>
+                <div className="h-7 bg-[#E5E9F0] rounded w-3/4" />
+                <div className="h-3 bg-[#E5E9F0] rounded w-1/2" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+            <KpiCard
+              title="Recoverable Revenue"
+              value={data?.revenue_at_risk ? `₹${Number(data.revenue_at_risk).toLocaleString("en-IN")}` : "₹31,44,680"}
+              contextualExplanation="Identified failure volume eligible for recovery policies"
+              icon={Layers}
+              accent="blue"
+            />
+            <KpiCard
+              title="Recovered Revenue"
+              value={data?.gross_recovered ? `₹${Number(data.gross_recovered).toLocaleString("en-IN")}` : "₹28,91,450"}
+              delta="24.7% vs previous 7 days"
+              contextualExplanation="Captured through successful recovery actions"
+              icon={CheckCircle2}
+              isPositive={true}
+              accent="green"
+            />
+            <KpiCard
+              title="Recovery Rate"
+              value={data?.recovery_rate_percent ? `${data.recovery_rate_percent.toFixed(1)}%` : "74.2%"}
+              delta="+18.4% lift"
+              contextualExplanation="Recovered revenue as percentage of recoverable"
+              icon={TrendingUp}
+              isPositive={true}
+              accent="green"
+            />
+            <KpiCard
+              title="Active Opportunities"
+              value={data?.open_count !== undefined ? String(data.open_count) : "44"}
+              contextualExplanation={`${data?.total_opportunities ?? 142} total opportunities tracked across rails`}
+              icon={AlertCircle}
+              accent="red"
+            />
+            <KpiCard
+              title="Avg. Time to Recover"
+              value="2.4 days"
+              delta="-0.8d vs baseline"
+              contextualExplanation="Average duration from initial decline to settlement"
+              icon={Activity}
+              isPositive={true}
+              accent="neutral"
+            />
+          </div>
+        )}
 
         {/* AUTONOMOUS RECOVERY AGENT CARD */}
         <div className="bg-white border border-[#E5E9F0] rounded-lg p-5 shadow-2xs space-y-4">
@@ -277,22 +293,24 @@ export default function OverviewPage() {
             <div className="flex items-center gap-4 sm:gap-6 text-xs font-mono">
               <div>
                 <span className="text-[#64748B] block text-[10px] uppercase font-semibold">Monitored</span>
-                <span className="font-bold text-[#0F172A] text-sm">142</span>
+                <span className="font-bold text-[#0F172A] text-sm">{data?.total_opportunities ?? 142}</span>
               </div>
               <div className="h-6 w-px bg-[#E5E9F0]" />
               <div>
                 <span className="text-[#64748B] block text-[10px] uppercase font-semibold">Actions Taken</span>
-                <span className="font-bold text-[#0F172A] text-sm">86</span>
+                <span className="font-bold text-[#0F172A] text-sm">{data?.actioned_count ?? 86}</span>
               </div>
               <div className="h-6 w-px bg-[#E5E9F0]" />
               <div>
                 <span className="text-[#64748B] block text-[10px] uppercase font-semibold">Successful</span>
-                <span className="font-bold text-[#008760] text-sm">64</span>
+                <span className="font-bold text-[#008760] text-sm">{data?.recovered_count ?? 64}</span>
               </div>
               <div className="h-6 w-px bg-[#E5E9F0]" />
               <div>
                 <span className="text-[#64748B] block text-[10px] uppercase font-semibold">Recovered GMV</span>
-                <span className="font-bold text-[#0F172A] text-sm">₹18.4L</span>
+                <span className="font-bold text-[#0F172A] text-sm">
+                  {data?.gross_recovered ? `₹${(data.gross_recovered / 100000).toFixed(1)}L` : "₹18.4L"}
+                </span>
               </div>
             </div>
           </div>
@@ -331,95 +349,108 @@ export default function OverviewPage() {
               Recovery Health
             </span>
             <span className="font-mono text-[11px]">
-              Evaluated across 8 active recovery opportunities
+              Evaluated across {data?.total_opportunities ?? 8} active recovery opportunities
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* 1. Healthy Card */}
-            <div
-              onClick={() => router.push("/opportunities?status=RECOVERED")}
-              className="bg-white border border-[#E5E9F0] border-l-4 border-l-[#00C48C] rounded-lg p-4 shadow-2xs hover:border-[#CBD5E1] transition-all cursor-pointer group"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-[#008760] uppercase tracking-wider flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-[#00C48C]" />
-                  Healthy / Recovered
-                </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#00C48C]/10 text-[#008760]">
-                  4 events
-                </span>
-              </div>
-              <div className="text-2xl font-bold text-[#0F172A] font-mono">
-                ₹31,548
-              </div>
-              <p className="text-xs text-[#5B6B84] mt-1">
-                Recovered transactions or candidates with &gt;80% recovery score.
-              </p>
-              <div className="w-full h-1 bg-[#E5E9F0] rounded-full mt-3.5 overflow-hidden">
-                <div
-                  className="h-full bg-[#00C48C] rounded-full transition-all"
-                  style={{ width: "50%" }}
-                />
-              </div>
+          {loadingOverview ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-white border border-[#E5E9F0] rounded-lg p-4 shadow-2xs animate-pulse space-y-3">
+                  <div className="h-4 bg-[#E5E9F0] rounded w-1/3" />
+                  <div className="h-8 bg-[#E5E9F0] rounded w-1/2" />
+                  <div className="h-3 bg-[#E5E9F0] rounded w-full" />
+                  <div className="h-1 bg-[#E5E9F0] rounded-full w-full" />
+                </div>
+              ))}
             </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* 1. Healthy Card */}
+              <div
+                onClick={() => router.push("/opportunities?status=RECOVERED")}
+                className="bg-white border border-[#E5E9F0] border-l-4 border-l-[#00C48C] rounded-lg p-4 shadow-2xs hover:border-[#CBD5E1] transition-all cursor-pointer group"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-[#008760] uppercase tracking-wider flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-[#00C48C]" />
+                    Healthy / Recovered
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#00C48C]/10 text-[#008760]">
+                    {data?.recovered_count ?? 4} events
+                  </span>
+                </div>
+                <div className="text-2xl font-bold text-[#0F172A] font-mono">
+                  ₹{Number(data?.gross_recovered ?? 31548).toLocaleString("en-IN")}
+                </div>
+                <p className="text-xs text-[#5B6B84] mt-1">
+                  Recovered transactions or candidates with &gt;80% recovery score.
+                </p>
+                <div className="w-full h-1 bg-[#E5E9F0] rounded-full mt-3.5 overflow-hidden">
+                  <div
+                    className="h-full bg-[#00C48C] rounded-full transition-all"
+                    style={{ width: `${Math.min(100, Math.round(((data?.recovered_count ?? 4) / (data?.total_opportunities || 8)) * 100))}%` }}
+                  />
+                </div>
+              </div>
 
-            {/* 2. In Active Recovery Card */}
-            <div
-              onClick={() => router.push("/opportunities?status=OPEN")}
-              className="bg-white border border-[#E5E9F0] border-l-4 border-l-[#F59E0B] rounded-lg p-4 shadow-2xs hover:border-[#CBD5E1] transition-all cursor-pointer group"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-[#B45309] uppercase tracking-wider flex items-center gap-1.5">
-                  <HeartPulse className="w-4 h-4 text-[#F59E0B]" />
-                  In Active Recovery
-                </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#F59E0B]/10 text-[#B45309]">
-                  4 events
-                </span>
+              {/* 2. In Active Recovery Card */}
+              <div
+                onClick={() => router.push("/opportunities?status=OPEN")}
+                className="bg-white border border-[#E5E9F0] border-l-4 border-l-[#F59E0B] rounded-lg p-4 shadow-2xs hover:border-[#CBD5E1] transition-all cursor-pointer group"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-[#B45309] uppercase tracking-wider flex items-center gap-1.5">
+                    <HeartPulse className="w-4 h-4 text-[#F59E0B]" />
+                    In Active Recovery
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#F59E0B]/10 text-[#B45309]">
+                    {data?.open_count ?? 4} events
+                  </span>
+                </div>
+                <div className="text-2xl font-bold text-[#0F172A] font-mono">
+                  ₹{Number(data?.revenue_at_risk ?? 148998).toLocaleString("en-IN")}
+                </div>
+                <p className="text-xs text-[#5B6B84] mt-1">
+                  Open candidates actively being diagnosed and actioned by AI agents.
+                </p>
+                <div className="w-full h-1 bg-[#E5E9F0] rounded-full mt-3.5 overflow-hidden">
+                  <div
+                    className="h-full bg-[#F59E0B] rounded-full transition-all"
+                    style={{ width: `${Math.min(100, Math.round(((data?.open_count ?? 4) / (data?.total_opportunities || 8)) * 100))}%` }}
+                  />
+                </div>
               </div>
-              <div className="text-2xl font-bold text-[#0F172A] font-mono">
-                ₹1,48,998
-              </div>
-              <p className="text-xs text-[#5B6B84] mt-1">
-                Open candidates actively being diagnosed and actioned by AI agents.
-              </p>
-              <div className="w-full h-1 bg-[#E5E9F0] rounded-full mt-3.5 overflow-hidden">
-                <div
-                  className="h-full bg-[#F59E0B] rounded-full transition-all"
-                  style={{ width: "50%" }}
-                />
-              </div>
-            </div>
 
-            {/* 3. Critical Exposure Card */}
-            <div
-              onClick={() => router.push("/opportunities?status=FAILED")}
-              className="bg-white border border-[#E5E9F0] border-l-4 border-l-[#EF4444] rounded-lg p-4 shadow-2xs hover:border-[#CBD5E1] transition-all cursor-pointer group"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-[#DC2626] uppercase tracking-wider flex items-center gap-1.5">
-                  <Flame className="w-4 h-4 text-[#EF4444]" />
-                  Critical Exposure
-                </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#EF4444]/10 text-[#DC2626]">
-                  0 events
-                </span>
-              </div>
-              <div className="text-2xl font-bold text-[#0F172A] font-mono">
-                ₹0
-              </div>
-              <p className="text-xs text-[#5B6B84] mt-1">
-                High-value transactions (&gt;₹10k) with score &lt;40% requiring review.
-              </p>
-              <div className="w-full h-1 bg-[#E5E9F0] rounded-full mt-3.5 overflow-hidden">
-                <div
-                  className="h-full bg-[#EF4444] rounded-full transition-all"
-                  style={{ width: "0%" }}
-                />
+              {/* 3. Critical Exposure Card */}
+              <div
+                onClick={() => router.push("/opportunities?status=FAILED")}
+                className="bg-white border border-[#E5E9F0] border-l-4 border-l-[#EF4444] rounded-lg p-4 shadow-2xs hover:border-[#CBD5E1] transition-all cursor-pointer group"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-[#DC2626] uppercase tracking-wider flex items-center gap-1.5">
+                    <Flame className="w-4 h-4 text-[#EF4444]" />
+                    Critical Exposure
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#EF4444]/10 text-[#DC2626]">
+                    0 events
+                  </span>
+                </div>
+                <div className="text-2xl font-bold text-[#0F172A] font-mono">
+                  ₹0
+                </div>
+                <p className="text-xs text-[#5B6B84] mt-1">
+                  High-value transactions (&gt;₹50k) requiring human authorization.
+                </p>
+                <div className="w-full h-1 bg-[#E5E9F0] rounded-full mt-3.5 overflow-hidden">
+                  <div
+                    className="h-full bg-[#EF4444] rounded-full transition-all"
+                    style={{ width: "0%" }}
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* ROW 3: Recharts Charts (30-day Area Chart + Donut with Right Legend) */}
