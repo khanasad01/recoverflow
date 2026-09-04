@@ -82,13 +82,13 @@ export default function ExperimentsPage() {
   const chartData = [
     {
       metric: "Gross Recovery (₹)",
-      Control: liftData?.control?.recovered_amount ?? 125000,
-      Treatment: liftData?.treatment?.recovered_amount ?? 310000,
+      Control: liftData?.control?.recovered_amount !== undefined ? liftData.control.recovered_amount : 125000,
+      Treatment: liftData?.treatment?.recovered_amount !== undefined ? liftData.treatment.recovered_amount : 310000,
     },
     {
       metric: "Recovery Rate (%)",
-      Control: Math.round((liftData?.control?.recovery_rate ?? 0.14) * 100),
-      Treatment: Math.round((liftData?.treatment?.recovery_rate ?? 0.38) * 100),
+      Control: Math.round((liftData?.control?.recovery_rate !== undefined ? liftData.control.recovery_rate : 0.14) * 100),
+      Treatment: Math.round((liftData?.treatment?.recovery_rate !== undefined ? liftData.treatment.recovery_rate : 0.38) * 100),
     },
   ];
 

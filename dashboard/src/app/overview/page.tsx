@@ -101,10 +101,20 @@ export default function OverviewPage() {
     toast.success("Recovery telemetry refreshed.");
   };
 
-  // Trajectory series: prefer API time_series if available, otherwise use designated timeframe data
+  // Trajectory series: prefer API time_series, or transform API timeline, otherwise use designated timeframe data
   const chartSeries =
     data?.time_series && data.time_series.length > 0
       ? data.time_series
+      : data?.timeline && data.timeline.length > 0 && data.gross_recovered > 0
+      ? data.timeline.map((t) => {
+          const avgPerRecovery = data.recovered_count > 0 ? data.gross_recovered / data.recovered_count : 5000;
+          const incPerRecovery = data.recovered_count > 0 ? data.incremental_recovery / data.recovered_count : 1500;
+          return {
+            timestamp: t.date.slice(5),
+            recovered_amount: Math.round(t.recovered * avgPerRecovery),
+            incremental_recovery: Math.round(t.recovered * incPerRecovery),
+          };
+        })
       : TRAJECTORY_DATA[timeframe];
 
   // Donut data with isolation filter
@@ -225,14 +235,14 @@ export default function OverviewPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
             <KpiCard
               title="Recoverable Revenue"
-              value={data?.revenue_at_risk ? `₹${Number(data.revenue_at_risk).toLocaleString("en-IN")}` : "₹31,44,680"}
+              value={data?.revenue_at_risk !== undefined ? `₹${Number(data.revenue_at_risk).toLocaleString("en-IN")}` : "₹31,44,680"}
               contextualExplanation="Identified failure volume eligible for recovery policies"
               icon={Layers}
               accent="blue"
             />
             <KpiCard
               title="Recovered Revenue"
-              value={data?.gross_recovered ? `₹${Number(data.gross_recovered).toLocaleString("en-IN")}` : "₹28,91,450"}
+              value={data?.gross_recovered !== undefined ? `₹${Number(data.gross_recovered).toLocaleString("en-IN")}` : "₹28,91,450"}
               delta="24.7% vs previous 7 days"
               contextualExplanation="Captured through successful recovery actions"
               icon={CheckCircle2}
@@ -241,7 +251,7 @@ export default function OverviewPage() {
             />
             <KpiCard
               title="Recovery Rate"
-              value={data?.recovery_rate_percent ? `${data.recovery_rate_percent.toFixed(1)}%` : "74.2%"}
+              value={data?.recovery_rate_percent !== undefined ? `${Number(data.recovery_rate_percent).toFixed(1)}%` : "74.2%"}
               delta="+18.4% lift"
               contextualExplanation="Recovered revenue as percentage of recoverable"
               icon={TrendingUp}
@@ -251,7 +261,7 @@ export default function OverviewPage() {
             <KpiCard
               title="Active Opportunities"
               value={data?.open_count !== undefined ? String(data.open_count) : "44"}
-              contextualExplanation={`${data?.total_opportunities ?? 142} total opportunities tracked across rails`}
+              contextualExplanation={`${data?.total_opportunities !== undefined ? data.total_opportunities : 142} total opportunities tracked across rails`}
               icon={AlertCircle}
               accent="red"
             />
@@ -294,23 +304,23 @@ export default function OverviewPage() {
             <div className="flex items-center gap-4 sm:gap-6 text-xs font-mono">
               <div>
                 <span className="text-[#64748B] block text-[10px] uppercase font-semibold">Monitored</span>
-                <span className="font-bold text-[#0F172A] text-sm">{data?.total_opportunities ?? 142}</span>
+                <span className="font-bold text-[#0F172A] text-sm">{data?.total_opportunities !== undefined ? data.total_opportunities : 142}</span>
               </div>
               <div className="h-6 w-px bg-[#E5E9F0]" />
               <div>
                 <span className="text-[#64748B] block text-[10px] uppercase font-semibold">Actions Taken</span>
-                <span className="font-bold text-[#0F172A] text-sm">{data?.actioned_count ?? 86}</span>
+                <span className="font-bold text-[#0F172A] text-sm">{data?.actioned_count !== undefined ? data.actioned_count : 86}</span>
               </div>
               <div className="h-6 w-px bg-[#E5E9F0]" />
               <div>
                 <span className="text-[#64748B] block text-[10px] uppercase font-semibold">Successful</span>
-                <span className="font-bold text-[#008760] text-sm">{data?.recovered_count ?? 64}</span>
+                <span className="font-bold text-[#008760] text-sm">{data?.recovered_count !== undefined ? data.recovered_count : 64}</span>
               </div>
               <div className="h-6 w-px bg-[#E5E9F0]" />
               <div>
                 <span className="text-[#64748B] block text-[10px] uppercase font-semibold">Recovered GMV</span>
                 <span className="font-bold text-[#0F172A] text-sm">
-                  {data?.gross_recovered ? `₹${(data.gross_recovered / 100000).toFixed(1)}L` : "₹18.4L"}
+                  {data?.gross_recovered !== undefined ? `₹${(data.gross_recovered / 100000).toFixed(1)}L` : "₹18.4L"}
                 </span>
               </div>
             </div>
@@ -350,7 +360,7 @@ export default function OverviewPage() {
               Recovery Health
             </span>
             <span className="font-mono text-[11px]">
-              Evaluated across {data?.total_opportunities ?? 8} active recovery opportunities
+              Evaluated across {data?.total_opportunities !== undefined ? data.total_opportunities : 8} active recovery opportunities
             </span>
           </div>
 
@@ -378,11 +388,11 @@ export default function OverviewPage() {
                     Healthy / Recovered
                   </span>
                   <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#00C48C]/10 text-[#008760]">
-                    {data?.recovered_count ?? 4} events
+                    {data?.recovered_count !== undefined ? data.recovered_count : 4} events
                   </span>
                 </div>
                 <div className="text-2xl font-bold text-[#0F172A] font-mono">
-                  ₹{Number(data?.gross_recovered ?? 31548).toLocaleString("en-IN")}
+                  ₹{Number(data?.gross_recovered !== undefined ? data.gross_recovered : 31548).toLocaleString("en-IN")}
                 </div>
                 <p className="text-xs text-[#5B6B84] mt-1">
                   Recovered transactions or candidates with &gt;80% recovery score.
@@ -406,11 +416,11 @@ export default function OverviewPage() {
                     In Active Recovery
                   </span>
                   <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#F59E0B]/10 text-[#B45309]">
-                    {data?.open_count ?? 4} events
+                    {data?.open_count !== undefined ? data.open_count : 4} events
                   </span>
                 </div>
                 <div className="text-2xl font-bold text-[#0F172A] font-mono">
-                  ₹{Number(data?.revenue_at_risk ?? 148998).toLocaleString("en-IN")}
+                  ₹{Number(data?.revenue_at_risk !== undefined ? data.revenue_at_risk : 148998).toLocaleString("en-IN")}
                 </div>
                 <p className="text-xs text-[#5B6B84] mt-1">
                   Open candidates actively being diagnosed and actioned by AI agents.
@@ -434,7 +444,7 @@ export default function OverviewPage() {
                     Critical Exposure
                   </span>
                   <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#EF4444]/10 text-[#DC2626]">
-                    0 events
+                    {data?.status_distribution?.FAILED !== undefined ? data.status_distribution.FAILED : 0} events
                   </span>
                 </div>
                 <div className="text-2xl font-bold text-[#0F172A] font-mono">

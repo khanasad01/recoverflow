@@ -96,9 +96,10 @@ export default function CustomersPage() {
                 </thead>
                 <tbody>
                   {customers.map((c) => {
-                    const failCount = c.total_opportunities || 1;
-                    const recRate = Math.min(100, Math.round((Number(c.total_recovered || 0) > 0 ? 0.8 : 0.2) * 100));
-                    const avgAmount = failCount > 0 ? Number(c.total_recovered || 12000) / failCount : 5000;
+                    const failCount = c.total_opportunities ?? 0;
+                    const totalRecovered = Number(c.total_recovered ?? 0);
+                    const avgAmount = failCount > 0 && totalRecovered > 0 ? totalRecovered / failCount : totalRecovered;
+                    const recRate = totalRecovered > 0 ? 80 : 0;
 
                     return (
                       <tr

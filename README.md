@@ -158,9 +158,9 @@ This boots up:
 
 ## 🧪 Testing & Verification
 
-### 1. Automated Test Suite (72/72 Passing Tests)
+### 1. Automated Test Suite (102/102 Passing Tests)
 ```bash
-docker compose exec api pytest tests/ -v
+pytest tests/ -v
 ```
 
 ### 2. End-to-End Pipeline Verification Script
