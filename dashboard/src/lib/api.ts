@@ -368,6 +368,7 @@ export async function loginUser(email: string, password: string) {
           email: email || "admin@recoverflow.dev",
           full_name: "Admin User",
           role: "admin",
+          is_active: true,
         },
       };
     }
