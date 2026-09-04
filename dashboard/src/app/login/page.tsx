@@ -159,10 +159,24 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-pill-primary w-full mt-2"
+              className="btn-pill-primary w-full mt-2 cursor-pointer"
             >
               {loading ? "Signing in..." : "Sign in"}
             </button>
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("admin@recoverflow.dev");
+                  setPassword("admin123");
+                  setEmailError("");
+                  setPasswordError("");
+                }}
+                className="w-full py-2 px-3 rounded-lg border border-[#E5E9F0] bg-[#F8F9FC] hover:bg-[#F1F4F9] text-xs font-semibold text-[#5B6B84] hover:text-[#0F172A] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <span>Quick Demo Fill (admin@recoverflow.dev)</span>
+              </button>
+            </div>
           </form>
         );
 
@@ -299,7 +313,7 @@ export default function LoginPage() {
         <div className="mt-8 text-center">
           <p className="text-sm text-[#5B6B84]">
             Don&apos;t have an account?{" "}
-            <a href="#" className="text-[#1E5EFF] hover:underline font-medium">
+            <a href="mailto:sales@recoverflow.dev" className="text-[#1E5EFF] hover:underline font-medium">
               Contact sales
             </a>
           </p>
