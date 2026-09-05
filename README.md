@@ -1,3 +1,11 @@
+<p align="center">
+  <img src="https://img.shields.io/badge/build-passing-brightgreen" alt="Build Status">
+  <img src="https://img.shields.io/badge/tests-102%2F102-success" alt="Tests">
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License">
+  <img src="https://img.shields.io/badge/Next.js-14-black" alt="Next.js">
+  <img src="https://img.shields.io/badge/FastAPI-0.115-blue" alt="FastAPI">
+</p>
+
 # RecoverFlow 🚀
 ### Enterprise Autonomous Payment Failure Recovery & Revenue Intelligence Engine
 
@@ -5,7 +13,57 @@
 
 ---
 
-## 🏗️ System Architecture
+## 📑 Table of Contents
+- [Problem](#-problem)
+- [Solution](#-solution)
+- [Why We Win](#-why-we-win)
+- [Demo](#-demo)
+- [Architecture](#-architecture)
+- [AI Judgment](#-ai-judgment)
+- [Safety & Guardrails](#-safety--guardrails)
+- [Metrics](#-metrics)
+- [Buildthon Criteria Mapping](#-buildthon-criteria-mapping)
+- [Technology Stack](#-technology-stack)
+- [Live Demo & Access](#-live-demo--access)
+- [Getting Started](#-getting-started)
+- [Roadmap](#-roadmap)
+- [Team](#-team)
+- [Screenshots & Demo](#-screenshots--demo)
+
+---
+
+<a id="-problem"></a>
+## 🛑 Problem
+In recurring billing and SaaS, **10% to 15% of transactions fail**, and over **30% of total customer churn is completely involuntary**—caused by transient bank timeouts, expired cards, or temporary balance shortfalls. Merchants typically rely on dumb retries or manual follow-ups, resulting in lost revenue and alert fatigue.
+
+---
+
+<a id="-solution"></a>
+## 💡 Solution
+RecoverFlow is an autonomous payment failure recovery and revenue intelligence engine. 
+
+1. **Multi-Gateway Ingestion**: Native support for **Razorpay** and **Stripe** with HMAC signature verification.
+2. **Opportunity Graph & Retry Linking**: Self-referential database linking connects multiple failure attempts for the same customer into an interconnected Opportunity Graph.
+3. **Hybrid ML Scoring (Heuristic & Scikit-Learn)**: Dynamic recoverability scoring based on customer lifetime value, historical success rates, gateway decline codes, and transaction velocity.
+4. **LangGraph Multi-Agent Orchestrator**: Multi-node state graph orchestrating Diagnosis (Gemini LLM / Rule Fallback), Action Ranking, Resource Limit Verification, and Dynamic Policy Checks.
+5. **Next.js 14 Command Center**: Real-time Revenue Health section, Explainable `<WhyCard />` breakdown, interactive policy editor with YAML validation, and SSE live telemetry.
+
+---
+
+<a id="-why-we-win"></a>
+## 🏆 Why We Win
+Most recovery systems stop at "recovered ₹X". RecoverFlow measures **incremental recovery** by running randomized control trials (A/B tests). We compare treatment vs. control group to show true lift, not just gross recovery. This is rare in hackathon projects and directly proves financial impact.
+
+---
+
+<a id="-demo"></a>
+## 🎬 Demo
+We built a fully functioning dashboard with real metrics, AI diagnosis, and autonomous agent tracing. See the [Live Demo & Access](#-live-demo--access) section below for credentials.
+
+---
+
+<a id="-architecture"></a>
+## 🏗️ Architecture
 
 ```text
                +----------------------------------+     +----------------------------------+
@@ -34,8 +92,7 @@
         +---------------------------+                               +---------------------------+
         |    Normalizer Pipeline    |                               |    Outcome Tracker &      |
         |  - RazorpayNormalizer     |                               |    Self-Learning Loop     |
-        |  - StripeNormalizer       |                               |  - Strategy Performance   |
-        |  - UnifiedEvent Schema    |                               |  - Resource Reset (Beat)  |
+        |  - StripeNormalizer       |                               |  - UnifiedEvent Schema    |
         +-------------+-------------+                               +---------------------------+
                       |
                       v
@@ -75,36 +132,66 @@
 
 ---
 
-## ✨ Key Enterprise Capabilities
-
-1. **Multi-Gateway Ingestion**:
-   - Native support for **Razorpay** (`payment.failed`, `payment.captured`, `payment_link.paid`) and **Stripe** (`payment_intent.payment_failed`, `invoice.payment_failed`, `checkout.session.completed`).
-   - HMAC-SHA256 signature verification per gateway with asynchronous non-blocking ingestion into PostgreSQL and Redis Streams.
-2. **Opportunity Graph & Retry Linking**:
-   - Self-referential database linking connects multiple failure attempts for the same customer into an interconnected Opportunity Graph.
-3. **Hybrid ML Scoring (Heuristic & Scikit-Learn)**:
-   - Dynamic recoverability scoring based on customer lifetime value, historical success rates, gateway decline codes, and transaction velocity.
-4. **LangGraph Multi-Agent Orchestrator**:
-   - Multi-node state graph orchestrating Diagnosis (Gemini LLM / Rule Fallback), Action Ranking, Resource Limit Verification, and Dynamic Policy Checks.
-5. **Adaptive Resource Limit Management & Dynamic Fallback**:
-   - Daily quotas (`payment_link: 500`, `smart_retry: 1000`, `incentive: 200`, `email_reminder: 2000`, `human_escalation: 50`) prevent customer fatigue and rate limiting.
-   - If an action quota is exhausted, the orchestrator **dynamically falls back to the next best eligible action** automatically.
-6. **Human Authorization Workflow**:
-   - High-value opportunities exceeding configurable threshold (`> ₹50,000`) trigger a `HUMAN_REVIEW` status requiring admin approval.
-7. **Empirical Self-Learning Feedback Loop**:
-   - Hourly Celery Beat task aggregates historical recovery outcomes, calculating empirical `success_rate` weights per failure reason to bias subsequent agent decisions.
-8. **Causal Incrementality & A/B Experimentation**:
-   - Randomized 50/50 A/B splitting (Treatment vs Control) with automated lift calculation and baseline attribution.
-9. **Next.js 14 Razorpay-Style Command Center**:
-   - Real-time Revenue Health section (Healthy, At Risk, Critical), Explainable `<WhyCard />` breakdown, interactive policy editor with YAML validation, and SSE live telemetry.
+<a id="-ai-judgment"></a>
+## 🧠 AI Judgment
+The orchestrator leverages **Gemini 2.5 Flash** for deep diagnosis of failure reasons. It contextualizes the user's history and gateway decline codes to output 3 key insights:
+1. *Why it failed?*
+2. *Why recovery is possible?*
+3. *Why the selected rail was chosen?*
 
 ---
 
-## 🚀 Quick Start (Docker Compose)
+<a id="-safety--guardrails"></a>
+## 🛡️ Safety & Guardrails
+- **Adaptive Resource Limit Management & Dynamic Fallback**: Daily quotas prevent customer fatigue. If exhausted, it falls back to the next best action.
+- **Human Authorization Workflow**: High-value opportunities exceeding a configurable threshold (`> ₹50,000`) trigger a `HUMAN_REVIEW` status requiring admin approval.
+- **Deterministic YAML Policies**: Hot-reloadable rules governing attempt caps and cooldowns.
+
+---
+
+<a id="-metrics"></a>
+## 📈 Metrics
+Benchmark performance reports generated using **Grafana k6 (v2.2.0)** on AWS EC2 backend infrastructure:
+- **Full Report**: [tests/LOAD_TEST_RESULTS.md](tests/LOAD_TEST_RESULTS.md)
+- **Health Ingress**: 1,437 requests, 46.35 req/s, **0.00% errors**, **p95 = 211.88ms**.
+- **Auth & Opportunities Ingress**: 328 requests, 20 concurrent VUs, **100% checks succeeded**, **0.00% errors**.
+
+---
+
+<a id="-buildthon-criteria-mapping"></a>
+## 📋 Buildthon Criteria Mapping
+
+| Criteria | Proof | Where to See |
+|----------|-------|--------------|
+| **Problem Taste** | Real revenue loss problem, ₹42.38L at risk in demo data | Dashboard Overview |
+| **Build Quality** | 102 hermetic tests, 0 lint errors, CI/CD green | `pytest tests/ -v`, GitHub Actions |
+| **AI Judgment** | AI used only for diagnosis/scoring, deterministic guardrails | `agents/orchestrator/graph.py`, `policies/default_policy.yaml` |
+| **Failure Recovery** | Idempotency, retries, offline fallback, resource quotas | `services/worker/tasks.py`, `dashboard/src/lib/api.ts` (fallback) |
+
+---
+
+<a id="-technology-stack"></a>
+## 🛠️ Technology Stack
+*Built with Python 3.11, FastAPI, LangGraph, Scikit-Learn, Celery, Redis, PostgreSQL, Next.js, and Tailwind CSS.*
+
+---
+
+<a id="-live-demo--access"></a>
+## 🔗 Live Demo & Access
+
+- **Frontend:** https://recoverflows.netlify.app
+- **Backend Swagger:** http://13.222.186.232:8000/docs
+
+> ⚠️ Demo environment uses test credentials and synthetic data. For access, use the "Quick Demo Fill" button on the login page, or contact the team.
+
+---
+
+<a id="-getting-started"></a>
+## 🚀 Getting Started
 
 ### 1. Clone & Environment Configuration
 ```bash
-git clone https://github.com/your-org/recoverflow.git
+git clone https://github.com/khanasad01/recoverflow.git
 cd recoverflow
 cp .env.example .env
 ```
@@ -121,123 +208,43 @@ This boots up:
 - **Celery Worker & Celery Beat Scheduler**
 - **Prometheus Metrics**: `http://localhost:8000/metrics`
 
-### 3. Log In to Dashboard
-- **URL**: `http://localhost:3000/login`
-- **Admin**: `admin@recoverflow.dev` / `admin123`
-- **Support**: `support@recoverflow.dev` / `support123`
-
----
-
-## 📡 REST API Reference
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/health` | Public | Healthcheck probe |
-| `GET` | `/metrics` | Public | Prometheus scrape telemetry |
-| `POST` | `/api/v1/auth/login` | Public | JWT token issuance |
-| `POST` | `/webhooks/razorpay` | HMAC | Razorpay webhook ingestion |
-| `POST` | `/webhooks/stripe` | HMAC | Stripe webhook ingestion |
-| `GET` | `/api/v1/overview` | Auth | Executive KPIs & distribution |
-| `GET` | `/api/v1/opportunities` | Auth | Filterable opportunities list |
-| `GET` | `/api/v1/opportunities/{id}` | Auth | Opportunity detail & score |
-| `POST` | `/api/v1/opportunities/{id}/action` | Auth | Manual action dispatch override |
-| `POST` | `/api/v1/opportunities/{id}/approve` | Auth | Approve high-value opportunity |
-| `POST` | `/api/v1/opportunities/{id}/reject` | Auth | Reject opportunity intervention |
-| `GET` | `/api/v1/opportunities/{id}/evidence`| Auth | Immutable evidence audit trail |
-| `GET` | `/api/v1/interventions` | Auth | List executed interventions |
-| `GET` | `/api/v1/customers` | Auth | Customer 360 overview |
-| `GET` | `/api/v1/experiments` | Auth | A/B experimentation tracking |
-| `GET` | `/api/v1/experiments/{id}/lift` | Auth | Recovery lift calculation |
-| `GET` | `/api/v1/analytics/incremental` | Auth | Incremental revenue attribution |
-| `GET` | `/api/v1/analytics/resource-usage` | Admin | Real-time daily quota tracking |
-| `GET` | `/api/v1/analytics/report` | Auth | Stakeholder report (JSON/MD) |
-| `GET` | `/api/v1/policy` | Auth | Read active YAML policy |
-| `PUT` | `/api/v1/policy` | Admin | Hot-reload YAML policy |
-
----
-
-## 🧪 Testing & Verification
-
-### 1. Automated Test Suite (102/102 Passing Tests)
+### 3. Testing & Verification
 ```bash
+# Automated Test Suite (102/102 Passing Tests)
 pytest tests/ -v
-```
 
-### 2. End-to-End Pipeline Verification Script
-```bash
-docker compose exec api python scripts/e2e_test.py
-```
-
-### 3. Frontend Production Build
-```bash
+# Frontend Production Build
 cd dashboard
 npm run build
 ```
 
 ---
 
----
-
-## 🔄 CI/CD Pipeline & Deployment
-
-RecoverFlow includes an automated GitHub Actions CI/CD pipeline:
-
-### Workflows
-- **Backend Continuous Deployment** (`.github/workflows/deploy.yml`):
-  - Automatically triggers on pushes to `main` modifying backend directories (`apps/**`, `services/**`, `database/**`, `integrations/**`, `requirements.txt`, `docker-compose.yml`).
-  - Deploys via SSH to the AWS EC2 production host (`13.222.186.232`).
-  - Pulls the latest code and executes `docker compose up -d --build`.
-- **Frontend Continuous Integration** (`.github/workflows/frontend-deploy.yml`):
-  - Triggers on pushes touching `dashboard/**`.
-  - Verifies production Next.js compilation (`npm run build`).
-  - Netlify automatically deploys the production build to [https://recoverflows.netlify.app](https://recoverflows.netlify.app).
-
-### GitHub Secrets Configuration
-To enable the EC2 SSH deployment workflow:
-1. In the GitHub repository, open **Settings** → **Secrets and variables** → **Actions**.
-2. Click **New repository secret**.
-3. **Name**: `EC2_SSH_KEY`
-4. **Secret**: Paste the full content of your EC2 `.pem` private key file.
+<a id="-roadmap"></a>
+## 🔮 Roadmap (Next 3 Months)
+- Add subscription & checkout abandonment recovery.
+- Replace heuristic scoring with real ML model (XGBoost).
+- Move to Kafka for event streaming at scale.
+- Add merchant-specific custom policies via UI.
+- Deploy on Kubernetes with Prometheus/Grafana.
 
 ---
 
-## 📊 Benchmark & Load Testing
+<a id="-screenshots--demo"></a>
+## 📸 Screenshots & Demo
+![RecoverFlow Overview](docs/overview.png)
+![Recovery Flow GIF](docs/demo.gif)
 
-Benchmark performance reports generated using **Grafana k6 (v2.2.0)** on AWS EC2 backend infrastructure:
-- **Full Report**: [tests/LOAD_TEST_RESULTS.md](file:///c:/Users/ASUS/Downloads/recoverflow/tests/LOAD_TEST_RESULTS.md)
-- **Health Ingress**: 1,437 requests, 46.35 req/s, **0.00% errors**, **p95 = 211.88ms**.
-- **Auth & Opportunities Ingress**: 328 requests, 20 concurrent VUs, **100% checks succeeded**, **0.00% errors**.
+---
+
+<a id="-team"></a>
+## 👥 Team
+| Name | Role |
+|------|------|
+| **Assad Akram** | Solo Developer - Product, Backend, Frontend, AI/ML, DevOps |
+> Built end-to-end as a solo engineering effort.
 
 ---
 
 ## 📑 Hackathon Submission
-- Comprehensive submission details, architecture rationale, and failure recovery matrices are documented in [SUBMISSION.md](file:///c:/Users/ASUS/Downloads/recoverflow/SUBMISSION.md).
-
----
-
-## ☸️ Kubernetes Deployment
-
-Production-ready Kubernetes manifests are located in `k8s/`:
-- `k8s/api-deployment.yaml`: FastAPI deployment with readiness/liveness probes and autoscaling.
-- `k8s/worker-deployment.yaml`: Celery worker & beat deployments.
-- `k8s/postgres.yaml` & `k8s/redis.yaml`: Persistent volume claims and database statefulsets.
-- `k8s/ingress.yaml`: TLS ingress routing.
-
-```bash
-kubectl apply -f k8s/
-```
-
----
-
-## 🎨 Dashboard Redesign & Production Polish (Phases 0–7)
-
-The RecoverFlow executive dashboard (`dashboard/`) has completed full production redesign, accessibility compliance, and QA verification:
-- **Phases 0–3**: Information architecture, fintech design system, responsive navigation, and core feature views.
-- **Phase 4**: Dark mode navy palette, precision typography, and layout optimizations.
-- **Phase 5**: Contextual loading skeletons, interactive empty states, error retry handling, and toast feedback.
-- **Phase 6**: Responsive breakpoints (Desktop, Tablet 72px icon collapse, Mobile off-canvas drawer) and WCAG AA accessibility compliance (`Escape` dismissal, focus rings, table semantics).
-- **Phase 7**: End-to-end demo flow testing, anti-generic design sanitization, link integrity, and final production sign-off.
-
----
-
-*Built with Python 3.11, FastAPI, LangGraph, Scikit-Learn, Celery, Redis, PostgreSQL, Next.js, and Tailwind CSS.*
+- Comprehensive submission details, architecture rationale, and failure recovery matrices are documented in [SUBMISSION.md](SUBMISSION.md).
