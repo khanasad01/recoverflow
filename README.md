@@ -233,14 +233,22 @@ npm run build
 <a id="-screenshots--demo"></a>
 ## 📸 Screenshots & Demo
 
-### Website Overview
+<details>
+<summary><b>Website</b></summary>
+<br>
+
 ![Website Overview 1](docs/website_overview_1.png)
 ![Website Overview 2](docs/website_overview_2.png)
 ![Website Overview 3](docs/website_overview_3.png)
+</details>
 
-### Outputs
+<details>
+<summary><b>Outputs</b></summary>
+<br>
+
 ![Output 1](docs/output_1.png)
 ![Output 2](docs/output_2.png)
+</details>
 
 ---
 
