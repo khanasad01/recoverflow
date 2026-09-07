@@ -232,8 +232,15 @@ npm run build
 
 <a id="-screenshots--demo"></a>
 ## 📸 Screenshots & Demo
-![RecoverFlow Overview](docs/overview.png)
-![Recovery Flow GIF](docs/demo.gif)
+
+### Website Overview
+![Website Overview 1](docs/website_overview_1.png)
+![Website Overview 2](docs/website_overview_2.png)
+![Website Overview 3](docs/website_overview_3.png)
+
+### Outputs
+![Output 1](docs/output_1.png)
+![Output 2](docs/output_2.png)
 
 ---
 
