@@ -257,6 +257,9 @@ npm run build
 
 ![Output 1](docs/output_1.png)
 ![Output 2](docs/output_2.png)
+![Payment Link Details](docs/output_3_payment_link_details.png)
+![Payment Link Success](docs/output_4_payment_link_success.png)
+![Razorpay Dashboard](docs/output_5_razorpay_dashboard.png)
 </details>
 
 ---
