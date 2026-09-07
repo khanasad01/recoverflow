@@ -240,6 +240,10 @@ npm run build
 ![Website Overview 1](docs/website_overview_1.png)
 ![Website Overview 2](docs/website_overview_2.png)
 ![Website Overview 3](docs/website_overview_3.png)
+![Rules & Workflows](docs/website_rules.png)
+![Settings & Integrations](docs/website_settings.png)
+![Opportunity Drawer 1](docs/website_drawer_1.png)
+![Opportunity Drawer 2](docs/website_drawer_2.png)
 </details>
 
 <details>
