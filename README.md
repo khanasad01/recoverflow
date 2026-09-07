@@ -237,6 +237,7 @@ npm run build
 <summary><b>Website</b></summary>
 <br>
 
+![Landing Page](docs/website_hero.png)
 ![Website Overview 1](docs/website_overview_1.png)
 ![Website Overview 2](docs/website_overview_2.png)
 ![Website Overview 3](docs/website_overview_3.png)
