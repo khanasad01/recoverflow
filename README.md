@@ -238,13 +238,17 @@ npm run build
 <br>
 
 ![Landing Page](docs/website_hero.png)
-![Website Overview 1](docs/website_overview_1.png)
-![Website Overview 2](docs/website_overview_2.png)
-![Website Overview 3](docs/website_overview_3.png)
+![Main Dashboard Overview](docs/website_main_overview.png)
+![Recovery Queue](docs/website_queue.png)
+![Opportunity Drawer - AI Diagnosis](docs/website_drawer_1.png)
+![Opportunity Drawer - Timeline](docs/website_drawer_2.png)
 ![Rules & Workflows](docs/website_rules.png)
+![Customer Intelligence](docs/website_customers.png)
+![Interventions Audit](docs/website_interventions.png)
+![A/B Testing Analytics](docs/website_analytics.png)
 ![Settings & Integrations](docs/website_settings.png)
-![Opportunity Drawer 1](docs/website_drawer_1.png)
-![Opportunity Drawer 2](docs/website_drawer_2.png)
+![Success State 1](docs/website_overview_1.png)
+![Success State 2](docs/website_overview_3.png)
 </details>
 
 <details>
